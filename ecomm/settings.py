@@ -81,6 +81,8 @@ DATABASES = {
 }
 """
 
+# Ishan's clone worked!
+
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
