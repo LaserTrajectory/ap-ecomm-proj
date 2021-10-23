@@ -83,6 +83,8 @@ DATABASES = {
 
 # Ishan's clone worked!
 
+# Bhavye's clone worked!
+
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
