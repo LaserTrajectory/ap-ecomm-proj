@@ -77,28 +77,28 @@ WSGI_APPLICATION = 'ecomm.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-"""
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-"""
+
 
 # Ishan's clone worked!
 
 # Bhavye's clone worked!
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'djongo',
-        'NAME': 'tutorial',
-        'CLIENT': {
-           'host': 'mongodb+srv://dj-connect:hu03pNz1fRMtQDUd@cluster0.5ynbk.mongodb.net/test',
-        }
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'djongo',
+#         'NAME': 'tutorial',
+#         'CLIENT': {
+#            'host': 'mongodb+srv://dj-connect:hu03pNz1fRMtQDUd@cluster0.5ynbk.mongodb.net/test',
+#         }
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
