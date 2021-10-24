@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from .models import Product
+from .models import Product, Category, Rating
+from django.db.models import Q
 
 # from rest_framework.renderers import TemplateHTMLRenderer
 # from rest_framework.response import Response
@@ -80,13 +81,92 @@ def product_page(request):
 
     product_context = {
         "product_list": queryset,
-        "name": product_obj.name,
+        "title": product_obj.title,
         "price": product_obj.price,
         "available_units": product_obj.description,
-        "seller": product_obj.seller
+        "seller": product_obj.seller,
+        "categories": product_obj.categories,
     }
 
     return render(request, 'base/prod-view.html', product_context)
+
+def SearchFilterView(request):
+
+    queryset = Product.objects.all()
+    category_set = Category.objects.all()
+    rating_set = Rating.objects.all().order_by('name')
+    title_contains = request.GET.get('title_contains')
+    seller_contains = request.GET.get('seller_contains')
+    id_exact = request.GET.get('id_exact')
+    name_or_seller = request.GET.get('name_or_seller')
+    view_price_min = request.GET.get('view_price_min')
+    view_price_max = request.GET.get('view_price_max')
+    category = request.GET.get('category')
+    rating = request.GET.get('rating')
+
+    ratings_list = []
+    count = 1
+    average_rating = 0
+
+    # print(type(rating_set))
+
+    if title_contains != '' and title_contains is not None:
+
+        queryset = queryset.filter(title__icontains=title_contains)
+
+    elif seller_contains != '' and seller_contains is not None:
+
+        queryset = queryset.filter(seller__icontains=seller_contains)
+
+    elif id_exact != '' and id_exact is not None:
+
+        queryset =  queryset.filter(id=id_exact)
+
+    elif name_or_seller != '' and name_or_seller is not None:
+
+        queryset = queryset.filter(Q(title__icontains=name_or_seller) | 
+        Q(seller__icontains=name_or_seller)).distinct()
+
+    if view_price_min != '' and view_price_min is not None:
+
+        queryset = queryset.filter(price__gte=view_price_min)
+
+    if view_price_max != '' and view_price_max is not None:
+
+        queryset = queryset.filter(price__lt=view_price_max)
+
+    if category != '' and category is not None and category != 'Choose...':
+
+        queryset = queryset.filter(categories__name=category)
+
+        for prod in queryset:
+
+            print("rating = ", prod.ratings.name)
+
+            ratings_list.append(prod.ratings.name)
+
+            average_rating = sum(ratings_list) / len(ratings_list)
+        
+
+    if rating != '' and rating is not None and rating != 'Choose...':
+
+        queryset = queryset.filter(ratings__name=rating)
+
+    context = {
+        'queryset': queryset,
+        'category_set': category_set,
+        'rating_set': rating_set,
+    }
+
+    context['average_rating'] = average_rating
+    context['selected_category'] = category
+    context['selected_rating'] = rating
+
+    ratings_list = []
+
+    return render(request, "base/search_filter_form.html", context=context)
+
+    
 
 # @api_view(('GET',))
 # @renderer_classes((TemplateHTMLRenderer, JSONRenderer))

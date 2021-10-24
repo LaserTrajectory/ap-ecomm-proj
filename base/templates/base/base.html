@@ -27,8 +27,9 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarToggle">
               <div class="navbar-nav mr-auto">
-                <a class="nav-item nav-link" href="{% url 'home' %}">Home</a>
+                <!-- <a class="nav-item nav-link" href="{% url 'home' %}">Home</a> -->
                 <a class="nav-item nav-link" href="{% url 'view-products' %}">View Products</a>
+                <a class="nav-item nav-link" href="{% url 'search-filter' %}">Search Products</a>
               </div>
               <!-- Navbar Right Side -->
               <!-- <div class="nav navbar-nav">
@@ -47,13 +48,12 @@
           </div>
           <div class="col-md-4">
             <div class="content-section">
-              <h3>Our Sidebar</h3>
-              <p class='text-muted'>You can put any information here you'd like.
+              <h3>Navigation</h3>
+              <!-- <p class='text-muted'>You can put any information here you'd like. -->
                 <ul class="list-group">
-                  <li class="list-group-item list-group-item-light">Latest Posts</li>
-                  <li class="list-group-item list-group-item-light">Announcements</li>
-                  <li class="list-group-item list-group-item-light">Calendars</li>
-                  <li class="list-group-item list-group-item-light">etc</li>
+                  <li class="list-group-item list-group-item-light">Wishlish</li>
+                  <li class="list-group-item list-group-item-light">Cart</li>
+                  <li class="list-group-item list-group-item-light">Checkout</li>
                 </ul>
               </p>
             </div>
