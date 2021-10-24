@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
+    'social_django',
+    'auth0login'
 ]
 
 MIDDLEWARE = [
@@ -149,3 +151,26 @@ CORS_ORIGIN_WHITELIST = (
     'http://127.0.0.1:8000',
     'http://localhost:8081'
 )
+
+from dotenv import load_dotenv
+import os
+project_folder = os.path.expanduser('/Users/aniruddhbhaskaran/Documents/Ashoka/AP/ecomm-proj') 
+load_dotenv(os.path.join(project_folder, '.env')) 
+
+SOCIAL_AUTH_AUTH0_DOMAIN = os.getenv("SOCIAL_AUTH_AUTH0_DOMAIN")
+SOCIAL_AUTH_AUTH0_KEY = os.getenv("SOCIAL_AUTH_AUTH0_KEY")
+SOCIAL_AUTH_AUTH0_SECRET = os.getenv("SOCIAL_AUTH_AUTH0_SECRET")
+
+SOCIAL_AUTH_AUTH0_SCOPE = [
+    'openid',
+    'profile',
+    'email'
+]
+
+AUTHENTICATION_BACKENDS = {
+    "auth0login.auth0backend.Auth0",
+    "django.contrib.auth.backends.ModelBackend",
+}
+
+LOGIN_URL = "/complete/auth0"
+LOGIN_REDIRECT_URL = "/"

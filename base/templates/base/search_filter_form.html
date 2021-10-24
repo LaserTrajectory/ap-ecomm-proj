@@ -1,11 +1,12 @@
 {% extends "base/base.html" %}
 
 {% block content%}
+    <h2>Search Products</h2>
     <form action="search-form" method="GET">
-        <input class="form-control py-2 border-right-0 border" type="search" name="title_contains" placeholder="Title contains..." />
-        <input class="form-control py-2 border-right-0 border" type="search" name="seller_contains" placeholder="Seller contains..." />
-        <input class="form-control py-2 border-right-0 border" type="search" name="id_exact" placeholder="ID is..." />
-        <input class="form-control py-2 border-right-0 border" type="search" name="name_or_seller" placeholder="Title or seller contains..." />
+        <input class="form-control py-2 border-right-0 border mt-2 mb-2" type="search" name="title_contains" placeholder="Title contains..." />
+        <input class="form-control py-2 border-right-0 border mt-2 mb-2" type="search" name="seller_contains" placeholder="Seller contains..." />
+        <input class="form-control py-2 border-right-0 border mt-2 mb-2" type="search" name="id_exact" placeholder="ID is..." />
+        <input class="form-control py-2 border-right-0 border mt-2 mb-2" type="search" name="name_or_seller" placeholder="Title or seller contains..." />
         <div class="row">
             <div class="form-group col-md-4 col-lg-4">
               <label for="viewCountMin">Minimum Price</label>

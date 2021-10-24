@@ -1,7 +1,15 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .models import Product, Category, Rating
 from django.db.models import Q
+from django.views.generic import View
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout as log_out
+from urllib.parse import urlencode
+from django.conf import settings
+from django.http import HttpResponseRedirect
+import json
 
 # from rest_framework.renderers import TemplateHTMLRenderer
 # from rest_framework.response import Response
@@ -166,7 +174,40 @@ def SearchFilterView(request):
 
     return render(request, "base/search_filter_form.html", context=context)
 
-    
+
+def index(request):
+    user = request.user
+    if user.is_authenticated:
+        return redirect(profile)
+    else:
+        return render(request, 'base/index.html')
+
+def logout(request):
+    log_out(request)
+    return_to = urlencode({"returnTo": request.build_absolute_uri("/")})
+    logout_url = "https://{}/v2/logout?client_id={}&{}".format(
+        settings.SOCIAL_AUTH_AUTH0_DOMAIN, settings.SOCIAL_AUTH_AUTH0_KEY, return_to,
+    )
+    return HttpResponseRedirect(logout_url)
+
+@login_required
+def profile(request):
+    user = request.user
+    auth0user = user.social_auth.get(provider='auth0')
+    userdata = {
+        'user_id': auth0user.uid,
+        'name': user.first_name,
+        'picture': auth0user.extra_data['picture'],
+        'email': auth0user.extra_data['email'],
+    }
+
+    user_name = user.first_name
+
+    return render(request, 'base/profile.html', {
+        'auth0User': auth0user,
+        'userdata': userdata,
+        'user_name': user_name
+    })
 
 # @api_view(('GET',))
 # @renderer_classes((TemplateHTMLRenderer, JSONRenderer))

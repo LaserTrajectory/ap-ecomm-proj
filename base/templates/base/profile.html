@@ -1,0 +1,11 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+
+    <div class="logged-in-box auth0-box logged-in">
+        <img class="avatar" src="{{ auth0User.extra_data.picture }}"/>
+        <h2>Welcome {{ user_name }}</h2>
+        <a class="btn btn-primary btn-lg btn-logout btn-block" href="/logout">Logout</a>
+    </div>
+    
+{% endblock content %}
