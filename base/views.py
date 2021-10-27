@@ -1,6 +1,7 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from .models import Product, Category, Rating
+from typing import List
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse, request
+from .models import Product, Category, Rating, Order, OrderProduct
 from django.db.models import Q
 from django.views.generic import View
 from django.utils.decorators import method_decorator
@@ -10,6 +11,11 @@ from urllib.parse import urlencode
 from django.conf import settings
 from django.http import HttpResponseRedirect
 import json
+from django.views.generic import DetailView, ListView
+from django.utils import timezone
+from django.contrib import messages
+
+from base import models
 
 # from rest_framework.renderers import TemplateHTMLRenderer
 # from rest_framework.response import Response
@@ -50,6 +56,12 @@ import json
 
 # dummy data for home view testing
 
+"""
+Sources:
+https://www.youtube.com/watch?v=Xjty8q524Jo&list=PLLRM7ROnmA9F2vBXypzzplFjcHUaKWWP5&index=2
+
+"""
+
 products = [
 
     {
@@ -78,25 +90,33 @@ products = [
 
 def home(request):
     # return HttpResponse(HOME_HTML)
+    
     return render(request, 'base/home.html')
+
 
 def product_page(request):
 
-    # return HttpResponse(PROD_HTML)
+# return HttpResponse(PROD_HTML)
 
     queryset = Product.objects.all()
-    product_obj = Product.objects.get(id=1)
 
-    product_context = {
-        "product_list": queryset,
-        "title": product_obj.title,
-        "price": product_obj.price,
-        "available_units": product_obj.description,
-        "seller": product_obj.seller,
-        "categories": product_obj.categories,
+    context = {
+        'queryset': queryset
     }
 
-    return render(request, 'base/prod-view.html', product_context)
+    return render(request, 'base/prod-view.html', context=context)
+
+
+class ProductView(ListView):
+
+    model = Product
+    template = 'base/prod-view.html'
+
+# class products_view(ListView):
+
+#     model = Product
+#     template = "base/product_list.html"
+
 
 def SearchFilterView(request):
 
@@ -149,11 +169,11 @@ def SearchFilterView(request):
 
         for prod in queryset:
 
-            print("rating = ", prod.ratings.name)
+            # print("rating = ", prod.ratings.name)
 
             ratings_list.append(prod.ratings.name)
 
-            average_rating = sum(ratings_list) / len(ratings_list)
+            average_rating = round((sum(ratings_list) / len(ratings_list)), 2)
         
 
     if rating != '' and rating is not None and rating != 'Choose...':
@@ -178,7 +198,7 @@ def SearchFilterView(request):
 def index(request):
     user = request.user
     if user.is_authenticated:
-        return redirect(profile)
+        return render(request, 'base/profile.html')
     else:
         return render(request, 'base/index.html')
 
@@ -208,6 +228,93 @@ def profile(request):
         'userdata': userdata,
         'user_name': user_name
     })
+
+
+def products(request):
+
+    context = {
+
+        "products": Product.objects.get(id=4)
+
+    }
+
+    return render(request, "base/product.html", context)
+
+class ProductDetailView(DetailView):
+
+    model = Product
+    template_name = "base/product.html"
+
+item_added_to_cart = 0
+
+def add_to_cart(request, slug):
+    
+    product = get_object_or_404(Product, slug=slug)
+    order_product, created = OrderProduct.objects.get_or_create(product=product, 
+    user=request.user, is_ordered=False)
+    order_qs = Order.objects.filter(user=request.user, is_ordered=False)
+    print("item units: ", product.available_units)
+    global item_added_to_cart
+
+    if order_qs.exists():
+        order = order_qs[0]
+        
+        if product.available_units != 0:
+
+            if order.products.filter(product__slug=product.slug).exists():
+                order_product.quantity += 1
+                order_product.save()
+                product.available_units -= 1
+                product.save()
+                item_added_to_cart += 1
+                messages.info(request, "Updated quantity in cart.")
+                return redirect("base:product", slug=slug)
+            else:
+                order.products.add(order_product)
+                product.available_units -= 1
+                product.save()
+                item_added_to_cart += 1
+                messages.info(request, "Added to cart.")
+                return redirect("base:product", slug=slug)
+
+        elif product.available_units == 0:
+                messages.info(request, "No available units.")
+                return redirect("base:product", slug=slug)
+
+    else:
+        ordered_date = timezone.now()
+        order = Order.objects.create(user=request.user, ordered_date=ordered_date)
+        order.products.add(order_product)
+        product.available_units -= 1
+        product.save()
+        item_added_to_cart += 1
+        messages.info(request, "Added to cart.")
+        return redirect("base:product", slug=slug)
+
+def remove_from_cart(request, slug):
+
+    product = get_object_or_404(Product, slug=slug)
+    order_qs = Order.objects.filter(user=request.user, is_ordered=False)
+    global item_added_to_cart
+
+    if order_qs.exists():
+        order = order_qs[0]
+        
+        if order.products.filter(product__slug=product.slug).exists():
+            order_product = OrderProduct.objects.filter(product=product, 
+                        user=request.user, is_ordered=False)[0]
+            order.products.remove(order_product)
+            product.available_units += item_added_to_cart 
+            product.save()
+            item_added_to_cart = 0
+            messages.info(request, "Removed from cart.")
+            return redirect("base:product", slug=slug)
+        else:
+            messages.info(request, "Item not in cart.")
+            return redirect("base:product", slug=slug)
+    else: 
+        messages.info(request, "No active orders.")
+        return redirect("base:product", slug=slug)
 
 # @api_view(('GET',))
 # @renderer_classes((TemplateHTMLRenderer, JSONRenderer))
