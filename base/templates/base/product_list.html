@@ -1,7 +1,7 @@
 {% extends "base/base.html" %}
 
 {% block content %}
-    {% for prod in queryset %}
+    {% for prod in object_list %}
         <article class="media content-section">
             <div class="media-body">
             <div class="article-metadata">
@@ -11,12 +11,16 @@
                 <small>|</small>
                 <small class="text-muted">{{ prod.categories }}</small>
             </div>
-            <h2><a class="article-title" href="#">{{ prod.title }}</a></h2>
+            <h2><a class="article-title" href="{{ prod.get_abs_url }}">{{ prod.title }}</a></h2>
             <p class="article-content">{{ prod.description }}</p>
             <p class="article-content">Availaible units: {{ prod.available_units }}</p>
             <p class="article-content">Review: {{ prod.reviews }}</p>
             <p class="article-content">Rating: {{ prod.ratings }} stars</p>
             <img src="{{ prod.image.url }}" alt="" width="200" height="200">
+            <a href="{{ prod.get_add_to_cart_url }}" class="btn btn-primary btn-md my-0 p">
+                Add to cart
+                <i class="fas fa-shopping-cart ml-1"></i>
+            </a>
             </div>
         </article>
     {% endfor %}

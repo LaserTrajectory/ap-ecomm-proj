@@ -1,0 +1,99 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+
+  <main class="mt-5 pt-4">
+    <div class="container dark-grey-text mt-5">
+
+      <!--Grid row-->
+      <div class="row wow fadeIn">
+
+        <!--Grid column-->
+        <div class="col-md-6 mb-4">
+
+          <img src="{{ object.image.url }}" class="img-fluid">
+
+        </div>
+        <!--Grid column-->
+
+        <!--Grid column-->
+        <div class="col-md-6 mb-4 border">
+
+          <!--Content-->
+          <div class="p-4">
+
+            <p class="lead">
+              <h2>{{ object.title }}</h2>
+            </p>
+
+            <p class="lead">
+              <span>&#8377;{{ object.price }}</span>
+            </p>
+
+            <p class="lead font-weight-bold">Seller</p>
+
+            <p>{{ object.seller }}</p>
+
+            <p>
+              <h5>Available units: {{ object.available_units }}</h5>
+            </p>
+
+            {% comment %}<form class="d-flex justify-content-left">
+              <!-- Default input -->
+              <input type="number" value="1" aria-label="Search" class="form-control" style="width: 100px">
+              <button class="btn btn-primary btn-md my-0 p" type="submit">
+                Add to cart
+                <i class="fas fa-shopping-cart ml-1"></i>
+              </button>
+
+            </form> {% endcomment %}
+            <a href="{{ object.get_add_to_cart_url }}" class="btn btn-primary btn-md my-0 p">
+              Add to cart
+              <i class="fas fa-shopping-cart ml-1"></i>
+            </a>
+            <a href="{{ object.get_remove_from_cart_url }}" class="btn btn-danger btn-md my-0 p">
+              Remove from cart
+            </a>
+
+          </div>
+          <!--Content-->
+
+        </div>
+        <!--Grid column-->
+
+      </div>
+      <!--Grid row-->
+
+      <hr>
+
+      <!--Grid row-->
+      <div class="row d-flex justify-content-center wow fadeIn">
+
+        <!--Grid column-->
+        <div class="col-md-6 text-center">
+
+          <h4 class="my-4 h4">Additional information</h4>
+
+          <p>
+            <h5>Description</h5>
+            <span>{{ object.description}}</span>
+          </p>
+
+          <p>
+            <h5>Ratings and Reviews</h5>
+            <span>Rating: {{ object.ratings }}</span>
+            <br>
+            <span>Review: {{ object.reviews }}</span>
+          </p>
+
+        </div>
+        <!--Grid column-->
+
+      </div>
+
+
+    </div>
+  </main>
+
+{% endblock content %}
+

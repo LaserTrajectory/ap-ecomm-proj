@@ -38,6 +38,7 @@
             </select>
         </div>
         <button type="submit" class="btn btn-outline-primary mt-2">Search</button>
+        <a class="nav-item nav-link" href="{% url 'base:search-filter' %}">Clear</a>
     </form>
 
     <hr>
@@ -69,7 +70,7 @@
                         {{ cat }}
                     {% endfor %}
                 </span> -->
-                <h2><a class="article-title" href="#">{{ prod.title }}</a></h2>
+                <h2><a class="article-title" href="{{ prod.get_abs_url }}">{{ prod.title }}</a></h2>
                 <p class="article-content">{{ prod.description }}</p>
                 <p class="article-content">Availaible units: {{ prod.available_units }}</p>
                 <p class="article-content">Category: {{ prod.categories }}</p>

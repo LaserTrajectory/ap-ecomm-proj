@@ -10,11 +10,16 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+from dotenv import load_dotenv
+import os
+
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+MEDIA_ROOT =  os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -152,8 +157,7 @@ CORS_ORIGIN_WHITELIST = (
     'http://localhost:8081'
 )
 
-from dotenv import load_dotenv
-import os
+
 project_folder = os.path.expanduser('/Users/aniruddhbhaskaran/Documents/Ashoka/AP/ecomm-proj') 
 load_dotenv(os.path.join(project_folder, '.env')) 
 
@@ -174,3 +178,5 @@ AUTHENTICATION_BACKENDS = {
 
 LOGIN_URL = "/complete/auth0"
 LOGIN_REDIRECT_URL = "/"
+
+SOCIAL_AUTH_URL_NAMESPACE = 'base:social'
