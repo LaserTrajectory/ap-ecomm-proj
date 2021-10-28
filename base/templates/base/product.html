@@ -30,9 +30,7 @@
               <span>&#8377;{{ object.price }}</span>
             </p>
 
-            <p class="lead font-weight-bold">Seller</p>
-
-            <p>{{ object.seller }}</p>
+            <p class="lead font-weight-bold">{{ object.seller }}</p>
 
             <p>
               <h5>Available units: {{ object.available_units }}</h5>
@@ -47,14 +45,17 @@
               </button>
 
             </form> {% endcomment %}
-            <a href="{{ object.get_add_to_cart_url }}" class="btn btn-primary btn-md my-0 p">
-              Add to cart
+            <a href="{{ object.get_add_to_cart_url }}" class="btn btn-primary btn-md my-0 p mt-2">
+              Add a unit to cart
               <i class="fas fa-shopping-cart ml-1"></i>
             </a>
-            <a href="{{ object.get_remove_from_cart_url }}" class="btn btn-danger btn-md my-0 p">
-              Remove from cart
+            <a href="{{ object.get_remove_one_from_cart_url }}" class="btn btn-warning btn-md my-0 p mt-2">
+              Remove one from cart
             </a>
-
+            <a href="{{ object.get_remove_all_from_cart_url }}" class="btn btn-danger btn-md my-0 p mt-2">
+              Remove all from cart
+            </a>
+            
           </div>
           <!--Content-->
 
