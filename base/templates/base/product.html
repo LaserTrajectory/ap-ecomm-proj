@@ -45,16 +45,28 @@
               </button>
 
             </form> {% endcomment %}
-            <a href="{{ object.get_add_to_cart_url }}" class="btn btn-primary btn-md my-0 p mt-2">
-              Add a unit to cart
-              <i class="fas fa-shopping-cart ml-1"></i>
-            </a>
-            <a href="{{ object.get_remove_one_from_cart_url }}" class="btn btn-warning btn-md my-0 p mt-2">
-              Remove one from cart
-            </a>
-            <a href="{{ object.get_remove_all_from_cart_url }}" class="btn btn-danger btn-md my-0 p mt-2">
-              Remove all from cart
-            </a>
+            <div class="container border">
+              <h4 class="mt-2">Cart</h3>
+              <a href="{{ object.get_add_to_cart_url }}" class="btn btn-primary btn-md my-0 p mt-1">
+                Add a unit to cart
+                <i class="fas fa-shopping-cart ml-1"></i>
+              </a>
+              <a href="{{ object.get_remove_one_from_cart_url }}" class="btn btn-warning btn-md my-0 p mt-2">
+                Remove one from cart
+              </a>
+              <a href="{{ object.get_remove_all_from_cart_url }}" class="btn btn-danger btn-md my-0 p mt-2 mb-2">
+                Remove all from cart
+              </a>
+            </div>
+            <div class="container border mt-2">
+              <h4 class="mt-2">Wishlist</h4>
+              <a href="{{ object.get_add_to_wishlist_url }}" class="btn btn-primary btn-md my-0 p mt-1">
+                Add to wishlist
+              </a>
+              <a href="{{ object.get_remove_all_from_cart_add_to_wishlist_url }}" class="btn btn-warning btn-md my-0 p mt-2 mb-2">
+                Move from cart to wishlist
+              </a>
+            </div>
             
           </div>
           <!--Content-->
@@ -67,6 +79,18 @@
 
       <hr>
 
+      <div class="container">
+        <h3>Add a review! (CURRENTLY NOT FUNCTIONAL: TO BE ADDED)</h3>
+        <form method="post">
+          {{ review.name }}
+        </form>
+      </div>
+
+      <div class="container">
+
+      </div>
+
+      <hr>
       <!--Grid row-->
       <div class="row d-flex justify-content-center wow fadeIn">
 
@@ -92,6 +116,7 @@
 
       </div>
 
+      
 
     </div>
   </main>

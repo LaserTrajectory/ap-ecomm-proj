@@ -5,9 +5,19 @@ from django.shortcuts import reverse
 
 # Create your models here.
 
+class UserProfile(models.Model):
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    display_name = models.CharField(max_length=100, default="User")
+    delivery_address = models.CharField(max_length=1000, default="Default address")
+
+    def __str__(self):
+
+        return "{0}'s user profile".format(self.user.username)
+
 class Review(models.Model):
 
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=1000)
 
     def __str__(self):
         return self.name
@@ -62,6 +72,16 @@ class Product(models.Model):
         return reverse("base:remove-one-from-cart", kwargs={
             'slug': self.slug
         })
+    
+    def get_add_to_wishlist_url(self):
+        return reverse("base:add-to-wishlist", kwargs={
+            'slug': self.slug
+        })
+
+    def get_remove_all_from_cart_add_to_wishlist_url(self):
+        return reverse("base:remove-all-from-cart-add-to-wishlist", kwargs={
+            'slug': self.slug
+        })
         
 
 class CartProduct(models.Model):
@@ -82,3 +102,13 @@ class Cart(models.Model):
     def __str__(self):
 
         return "{0}'s cart".format(self.user.username)
+
+class Wishlist(models.Model):
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    products = models.ManyToManyField(CartProduct)
+    added_to_cart = models.BooleanField(default=False)
+
+    def __str__(self):
+
+        return "{0}'s wishlist".format(self.user.username)

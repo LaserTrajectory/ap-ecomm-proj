@@ -2,7 +2,9 @@ from typing import List
 from django.http.response import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, request
-from .models import CartProduct, Product, Category, Rating, Cart, CartProduct
+
+from base.forms import ReviewForm, UserProfileForm
+from .models import CartProduct, Product, Category, Rating, Cart, CartProduct, UserProfile, Wishlist
 from django.db.models import Q
 from django.views.generic import View
 from django.utils.decorators import method_decorator
@@ -17,6 +19,7 @@ from django.views.generic import DetailView, ListView
 from django.utils import timezone
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
+from django.template.response import TemplateResponse
 
 from base import models
 
@@ -170,6 +173,7 @@ def logout(request):
 def profile(request):
     user = request.user
     auth0user = user.social_auth.get(provider='auth0')
+    user_profile_obj = get_object_or_404(UserProfile, user=request.user)
     userdata = {
         'user_id': auth0user.uid,
         'name': user.first_name,
@@ -182,19 +186,34 @@ def profile(request):
     return render(request, 'base/profile.html', {
         'auth0User': auth0user,
         'userdata': userdata,
-        'user_name': user_name
+        'user_name': user_name,
+        'user_profile_obj': user_profile_obj,
     })
 
 
-def products(request):
+def products(request, slug):
+
+    object = get_object_or_404(Product, slug=slug)
+    review_form = ReviewForm()
 
     context = {
 
-        "products": Product.objects.get(id=4)
+        "object": object,
+        "review": review_form
 
     }
 
+
     return render(request, "base/product.html", context)
+
+# def add_review(request, slug):
+
+#     new_review_form = ReviewForm(request.POST)
+
+#     if new_review_form.is_valid():
+
+#         new_review = new_review_form.save()
+
 
 class ProductDetailView(DetailView):
 
@@ -240,8 +259,8 @@ def add_to_cart(request, slug):
             product.available_units -= 1
             product.save()
             item_added_to_cart += 1
-            messages.info(request, "Added {0} to cart.".format(product.title))
-            return redirect("base:product", slug=slug)
+            messages.info(request, "Created cart and added {0}!".format(product.title))
+            return redirect("base:cart")
 
         elif product.available_units != 0 and cart_order.products.filter(product__slug = product.slug).exists() == True:
 
@@ -257,6 +276,27 @@ def add_to_cart(request, slug):
             messages.info(request, "No more items left to be added to cart. Sorry :(")
             return redirect("base:product", slug=slug)
 
+@login_required
+def add_to_wishlist(request, slug):
+
+    product = get_object_or_404(Product, slug=slug)
+    wishlist_product, created = CartProduct.objects.get_or_create(product=product, user=request.user)
+    wishlist_product_list = Wishlist.objects.filter(user=request.user, added_to_cart=False)
+
+    if wishlist_product_list.exists() == False:
+
+        wishlist = Wishlist.objects.create(user=request.user)
+        wishlist.products.add(wishlist_product)
+        messages.info(request, "Created wishlist and added {0}!".format(product.title))
+        return redirect("base:wishlist")
+    
+    else:
+
+        wishlist = wishlist_product_list[0]
+        wishlist.products.add(wishlist_product)
+        messages.info(request, "Added {0} to your wishlist!".format(product.title))
+        return redirect("base:product", slug=slug)
+    
 @login_required
 def remove_all_from_cart(request, slug):
 
@@ -339,6 +379,8 @@ def cart_view(request):
         context = {
             'cart': cart
         }
+        # print(cart.products.count())
+        request.session['cart_count_num'] = cart.products.count()
         return render(request, "base/cart-view.html", context=context)
         
     except ObjectDoesNotExist:
@@ -352,3 +394,70 @@ def autosuggestion_title(request):
     for prod in queryset:
         title_return_list.append(prod.title)
     return JsonResponse(title_return_list, safe=False)
+
+@login_required
+def wishlist_view(request):
+
+    try:
+        wishlist = Wishlist.objects.get(user=request.user)
+        context = {
+            'wishlist': wishlist
+        }
+        request.session['wishlist_count_num'] = wishlist.products.count()
+        return render(request, "base/wishlist-view.html", context=context)
+        
+    except ObjectDoesNotExist:
+        messages.error(request, "You haven't created a wishlist yet.")
+        return redirect("base:profile")
+
+@login_required
+def remove_all_from_cart_add_to_wishlist(request, slug):
+
+    product = get_object_or_404(Product, slug=slug)
+    cart_orders_list = Cart.objects.filter(user=request.user, is_ordered=False)
+    global item_added_to_cart
+
+    if cart_orders_list.exists() == False:
+
+        messages.info(request, "There's nothing in your cart right now.")
+        return redirect("base:product", slug=slug)
+
+    else:
+
+        cart_order = cart_orders_list[0]
+
+        if cart_order.products.filter(product__slug = product.slug).exists() == False:
+
+            messages.info(request, "{0} was not found in your cart.".format(product.title))
+            return redirect("base:product", slug=slug)
+
+        else:
+
+            cart_product_to_remove = CartProduct.objects.filter(product=product, user=request.user)[0]
+            cart_order.products.remove(cart_product_to_remove)
+            product.available_units += item_added_to_cart 
+            product.save()
+            add_to_wishlist(request, slug)
+            return_string = "{0} was removed from your cart!".format(product.title)
+            messages.info(request, return_string)
+            item_added_to_cart = 0
+            return redirect("base:product", slug=slug) 
+
+@login_required
+def edit_profile(request):
+
+    user_profile_obj = get_object_or_404(UserProfile, user=request.user)
+
+    user_profile_form = UserProfileForm(request.POST, instance=user_profile_obj)
+
+    if user_profile_form.is_valid():
+        new_form = user_profile_form.save()
+        return redirect("base:profile")
+
+    context = {
+        'form': user_profile_form,
+        'user': user_profile_obj
+    }
+
+    return render(request, "base/edit-profile.html", context=context)
+

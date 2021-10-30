@@ -1,0 +1,8 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+    <h3>Your wishlist</h3>
+    {% for wishlist_inst in wishlist.products.all %}
+        <p> <a href="{{ wishlist_inst.product.get_abs_url }}">{{ wishlist_inst.product.title }}</a> | {{ wishlist_inst.product.price }}</p>
+    {% endfor %}
+{% endblock content %}
