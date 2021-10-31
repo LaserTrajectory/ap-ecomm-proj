@@ -1,11 +1,15 @@
 from typing import List
+from django.http.response import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, request
-from .models import Product, Category, Rating, Order, OrderProduct
+
+from base.forms import UserProfileForm
+from .models import CartProduct, Product, Category, Rating, Cart, CartProduct, ReviewProduct, UserProfile, Wishlist
 from django.db.models import Q
 from django.views.generic import View
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import logout as log_out
 from urllib.parse import urlencode
 from django.conf import settings
@@ -14,47 +18,10 @@ import json
 from django.views.generic import DetailView, ListView
 from django.utils import timezone
 from django.contrib import messages
+from django.core.exceptions import ObjectDoesNotExist
+from django.template.response import TemplateResponse
 
 from base import models
-
-# from rest_framework.renderers import TemplateHTMLRenderer
-# from rest_framework.response import Response
-# from rest_framework.views import APIView
-
-# from rest_framework.decorators import api_view, renderer_classes
-# from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
-
-# from django.http.response import JsonResponse
-# from rest_framework.parsers import JSONParser 
-# from rest_framework import status
- 
-# from tutorials.models import Tutorial
-# from tutorials.serializers import TutorialSerializer
-# from rest_framework.decorators import api_view
-
-# Create your views here.
-
-# HOME_HTML = """
-
-#     <h1> Webpage Home </h1>
-
-#     <div>
-#     <p> Welcome to the webpage home! </p>
-#     </div>
-
-# """
-
-# PROD_HTML = """
-
-#     <h1> View Products Page </h1>
-
-#     <div>
-#     <p> Welcome to the View Products Page! </p>
-#     </div>
-
-# """
-
-# dummy data for home view testing
 
 """
 Sources:
@@ -62,41 +29,39 @@ https://www.youtube.com/watch?v=Xjty8q524Jo&list=PLLRM7ROnmA9F2vBXypzzplFjcHUaKW
 
 """
 
-products = [
+# dummy data
+# products = [
 
-    {
-        'name': 'Apple MacBook Pro',
-        'price': '$1500',
-        'available_units': '5',
-        'description': 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
-        'seller': 'Apple'
-    },
-    {
-        'name': 'Apple iPad',
-        'price': '$1250',
-        'available_units': '3',
-        'description': 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
-        'seller': 'Apple'
-    },
-    {
-        'name': 'Apple iPhone',
-        'price': '$1000',
-        'available_units': '1',
-        'description': 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
-        'seller': 'Apple'
-    }
+#     {
+#         'name': 'Apple MacBook Pro',
+#         'price': '$1500',
+#         'available_units': '5',
+#         'description': 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
+#         'seller': 'Apple'
+#     },
+#     {
+#         'name': 'Apple iPad',
+#         'price': '$1250',
+#         'available_units': '3',
+#         'description': 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
+#         'seller': 'Apple'
+#     },
+#     {
+#         'name': 'Apple iPhone',
+#         'price': '$1000',
+#         'available_units': '1',
+#         'description': 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
+#         'seller': 'Apple'
+#     }
 
-]
+# ]
 
 def home(request):
-    # return HttpResponse(HOME_HTML)
     
     return render(request, 'base/home.html')
 
 
 def product_page(request):
-
-# return HttpResponse(PROD_HTML)
 
     queryset = Product.objects.all()
 
@@ -110,13 +75,7 @@ def product_page(request):
 class ProductView(ListView):
 
     model = Product
-    template = 'base/prod-view.html'
-
-# class products_view(ListView):
-
-#     model = Product
-#     template = "base/product_list.html"
-
+    template = 'base/product_list.html'
 
 def SearchFilterView(request):
 
@@ -214,6 +173,7 @@ def logout(request):
 def profile(request):
     user = request.user
     auth0user = user.social_auth.get(provider='auth0')
+    user_profile_obj = get_object_or_404(UserProfile, user=request.user)
     userdata = {
         'user_id': auth0user.uid,
         'name': user.first_name,
@@ -226,19 +186,48 @@ def profile(request):
     return render(request, 'base/profile.html', {
         'auth0User': auth0user,
         'userdata': userdata,
-        'user_name': user_name
+        'user_name': user_name,
+        'user_profile_obj': user_profile_obj,
     })
 
 
-def products(request):
+def products(request, slug):
+
+    object = get_object_or_404(Product, slug=slug)
+
+    if request.method == "POST":
+
+        rev_content = request.POST.get('review', '')
+
+        print("rev_content:", rev_content)
+
+        review = ReviewProduct.objects.create(product=object, user=request.user, review=rev_content)
+
+        return redirect("base:product", slug=slug)
+
+    review_list = ReviewProduct.objects.filter(product=object)
+
+    # user_meta = UserProfile.objects.filter(user=review_list.user)
 
     context = {
 
-        "products": Product.objects.get(id=4)
+        "object": object,
+        "review_list": review_list,
+        # "user_meta": user_meta
 
     }
 
+
     return render(request, "base/product.html", context)
+
+# def add_review(request, slug):
+
+#     new_review_form = ReviewForm(request.POST)
+
+#     if new_review_form.is_valid():
+
+#         new_review = new_review_form.save()
+
 
 class ProductDetailView(DetailView):
 
@@ -246,87 +235,243 @@ class ProductDetailView(DetailView):
     template_name = "base/product.html"
 
 item_added_to_cart = 0
+initial_available_units = 0
 
+@login_required
 def add_to_cart(request, slug):
     
     product = get_object_or_404(Product, slug=slug)
-    order_product, created = OrderProduct.objects.get_or_create(product=product, 
-    user=request.user, is_ordered=False)
-    order_qs = Order.objects.filter(user=request.user, is_ordered=False)
-    print("item units: ", product.available_units)
+    cart_product, created = CartProduct.objects.get_or_create(product=product, 
+    user=request.user)
+    # print("item units: ", product.available_units)
     global item_added_to_cart
+    global initial_available_units
 
-    if order_qs.exists():
-        order = order_qs[0]
-        
-        if product.available_units != 0:
+    cart_orders_list = Cart.objects.filter(user=request.user, is_ordered=False)
 
-            if order.products.filter(product__slug=product.slug).exists():
-                order_product.quantity += 1
-                order_product.save()
-                product.available_units -= 1
-                product.save()
-                item_added_to_cart += 1
-                messages.info(request, "Updated quantity in cart.")
-                return redirect("base:product", slug=slug)
-            else:
-                order.products.add(order_product)
-                product.available_units -= 1
-                product.save()
-                item_added_to_cart += 1
-                messages.info(request, "Added to cart.")
-                return redirect("base:product", slug=slug)
+    if cart_orders_list.exists() == False:
 
-        elif product.available_units == 0:
-                messages.info(request, "No available units.")
-                return redirect("base:product", slug=slug)
-
-    else:
-        ordered_date = timezone.now()
-        order = Order.objects.create(user=request.user, ordered_date=ordered_date)
-        order.products.add(order_product)
+        cart_order = Cart.objects.create(user=request.user)
+        initial_available_units = product.available_units
+        print("init avail units: ", initial_available_units)
+        cart_order.products.add(cart_product)
         product.available_units -= 1
         product.save()
         item_added_to_cart += 1
-        messages.info(request, "Added to cart.")
+        messages.info(request, "Created cart and added {0}!".format(product.title))
         return redirect("base:product", slug=slug)
 
-def remove_from_cart(request, slug):
+    else:
+        
+        cart_order = cart_orders_list[0]
+
+        if product.available_units != 0 and cart_order.products.filter(product__slug = product.slug).exists() == False:
+
+            initial_available_units = product.available_units
+            print("init avail units: ", initial_available_units)
+            cart_order.products.add(cart_product)
+            product.available_units -= 1
+            product.save()
+            item_added_to_cart += 1
+            messages.info(request, "Added {0} to your cart!".format(product.title))
+            return redirect("base:cart")
+
+        elif product.available_units != 0 and cart_order.products.filter(product__slug = product.slug).exists() == True:
+
+            cart_product.quantity += 1
+            cart_product.save()
+            product.available_units -= 1
+            product.save()
+            item_added_to_cart += 1
+            messages.info(request, "Added 1 unit of {0} to your cart.".format(product.title))
+            return redirect("base:product", slug=slug)
+
+        else:
+            messages.info(request, "No more items left to be added to cart. Sorry :(")
+            return redirect("base:product", slug=slug)
+
+
+@login_required
+def add_to_wishlist(request, slug):
 
     product = get_object_or_404(Product, slug=slug)
-    order_qs = Order.objects.filter(user=request.user, is_ordered=False)
+    wishlist_product, created = CartProduct.objects.get_or_create(product=product, user=request.user)
+    wishlist_product_list = Wishlist.objects.filter(user=request.user, added_to_cart=False)
+
+    if wishlist_product_list.exists() == False:
+
+        wishlist = Wishlist.objects.create(user=request.user)
+        wishlist.products.add(wishlist_product)
+        messages.info(request, "Created wishlist and added {0}!".format(product.title))
+        return redirect("base:wishlist")
+    
+    else:
+        wishlist = wishlist_product_list[0]
+        wishlist.products.add(wishlist_product)
+        messages.info(request, "Added {0} to your wishlist!".format(product.title))
+        return redirect("base:product", slug=slug)
+    
+@login_required
+def remove_all_from_cart(request, slug):
+
+    product = get_object_or_404(Product, slug=slug)
+    cart_orders_list = Cart.objects.filter(user=request.user, is_ordered=False)
     global item_added_to_cart
 
-    if order_qs.exists():
-        order = order_qs[0]
-        
-        if order.products.filter(product__slug=product.slug).exists():
-            order_product = OrderProduct.objects.filter(product=product, 
-                        user=request.user, is_ordered=False)[0]
-            order.products.remove(order_product)
-            product.available_units += item_added_to_cart 
-            product.save()
-            item_added_to_cart = 0
-            messages.info(request, "Removed from cart.")
-            return redirect("base:product", slug=slug)
-        else:
-            messages.info(request, "Item not in cart.")
-            return redirect("base:product", slug=slug)
-    else: 
-        messages.info(request, "No active orders.")
+    if cart_orders_list.exists() == False:
+
+        messages.info(request, "There's nothing in your cart right now.")
         return redirect("base:product", slug=slug)
 
-# @api_view(('GET',))
-# @renderer_classes((TemplateHTMLRenderer, JSONRenderer))
-# def get(request):
-#         queryset = Product.objects.all()
-#         product_obj = Product.objects.get(id=1)
+    else:
 
-#         product_context = {
-#             "product_list": queryset,
-#             "name": product_obj.name,
-#             "price": product_obj.price,
-#             "available_units": product_obj.description,
-#             "seller": product_obj.seller
-#         }
-#         return render(request, 'base/prod-list.html', product_context)
+        cart_order = cart_orders_list[0]
+
+        if cart_order.products.filter(product__slug = product.slug).exists() == False:
+
+            messages.info(request, "{0} was not found in your cart.".format(product.title))
+            return redirect("base:product", slug=slug)
+
+        else:
+
+            cart_product_to_remove = CartProduct.objects.filter(product=product, user=request.user)[0]
+            cart_order.products.remove(cart_product_to_remove)
+            product.available_units += item_added_to_cart 
+            product.save()
+            return_string = "{0} units of {1} were removed from your cart".format(item_added_to_cart, product.title)
+            messages.info(request, return_string)
+            item_added_to_cart = 0
+            return redirect("base:product", slug=slug)   
+
+@login_required
+def remove_one_from_cart(request, slug):
+
+    product = get_object_or_404(Product, slug=slug)
+    cart_orders_list = Cart.objects.filter(user=request.user, is_ordered=False)
+    global initial_available_units
+    print("init avail units: ", initial_available_units)
+    print("prod avail units: ", product.available_units)
+    
+    if cart_orders_list.exists() == False:
+
+        messages.info(request, "{0} was not found in your cart.".format(product.title))
+        return redirect("base:product", slug=slug)
+
+    else:
+
+        cart_order = cart_orders_list[0]
+
+        if cart_order.products.filter(product__slug = product.slug).exists() == False:
+
+            messages.info(request, "{0} was not found in your cart.".format(product.title))
+            return redirect("base:product", slug=slug)
+
+        else:
+
+            cart_product_to_reduce = CartProduct.objects.filter(product=product, user=request.user)[0]
+
+            if cart_product_to_reduce.quantity > 0 and product.available_units <= (initial_available_units - 1):
+
+                cart_product_to_reduce.quantity -= 1
+                cart_product_to_reduce.save()
+                product.available_units += 1
+                product.save()
+                return_string = "1 unit of {0} removed from cart".format(product.title)
+                messages.info(request, return_string)
+                return redirect("base:product", slug=slug)
+
+            else:
+
+                messages.info(request, "{0} was not found in your cart.".format(product.title))
+                return redirect("base:product", slug=slug)
+
+@login_required
+def cart_view(request):
+
+    try:
+        cart = Cart.objects.get(user=request.user, is_ordered=False)
+        context = {
+            'cart': cart
+        }
+        # print(cart.products.count())
+        request.session['cart_count_num'] = cart.products.count()
+        return render(request, "base/cart-view.html", context=context)
+        
+    except ObjectDoesNotExist:
+        messages.error(request, "You haven't created a cart yet.")
+        return redirect("base:profile")
+
+def autosuggestion_title(request):
+
+    queryset = Product.objects.filter(title__icontains=request.GET.get('term'))
+    title_return_list = []
+    for prod in queryset:
+        title_return_list.append(prod.title)
+    return JsonResponse(title_return_list, safe=False)
+
+@login_required
+def wishlist_view(request):
+
+    try:
+        wishlist = Wishlist.objects.get(user=request.user)
+        context = {
+            'wishlist': wishlist,
+        }
+        request.session['wishlist_count_num'] = wishlist.products.count()
+        return render(request, "base/wishlist-view.html", context=context)
+        
+    except ObjectDoesNotExist:
+        messages.error(request, "You haven't created a wishlist yet.")
+        return redirect("base:profile")
+
+@login_required
+def remove_all_from_cart_add_to_wishlist(request, slug):
+
+    product = get_object_or_404(Product, slug=slug)
+    cart_orders_list = Cart.objects.filter(user=request.user, is_ordered=False)
+    global item_added_to_cart
+
+    if cart_orders_list.exists() == False:
+
+        messages.info(request, "There's nothing in your cart right now.")
+        return redirect("base:product", slug=slug)
+
+    else:
+
+        cart_order = cart_orders_list[0]
+
+        if cart_order.products.filter(product__slug = product.slug).exists() == False:
+
+            messages.info(request, "{0} was not found in your cart.".format(product.title))
+            return redirect("base:product", slug=slug)
+
+        else:
+
+            cart_product_to_remove = CartProduct.objects.filter(product=product, user=request.user)[0]
+            cart_order.products.remove(cart_product_to_remove)
+            product.available_units += item_added_to_cart 
+            product.save()
+            add_to_wishlist(request, slug)
+            return_string = "{0} was removed from your cart!".format(product.title)
+            messages.info(request, return_string)
+            item_added_to_cart = 0
+            return redirect("base:product", slug=slug) 
+
+@login_required
+def edit_profile(request):
+
+    user_profile_obj = get_object_or_404(UserProfile, user=request.user)
+
+    user_profile_form = UserProfileForm(request.POST, instance=user_profile_obj)
+
+    if user_profile_form.is_valid():
+        new_form = user_profile_form.save()
+        return redirect("base:profile")
+
+    context = {
+        'form': user_profile_form,
+        'user': user_profile_obj
+    }
+
+    return render(request, "base/edit-profile.html", context=context)
+

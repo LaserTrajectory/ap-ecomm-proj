@@ -1,0 +1,8 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+    <h3>Your cart</h3>
+    {% for cart_order in cart.products.all %}
+        <p> <a href="{{ cart_order.product.get_abs_url }}">{{ cart_order.product.title }}</a> | {{ cart_order.product.price }} | {{ cart_order.quantity }}</p>
+    {% endfor %}
+{% endblock content %}

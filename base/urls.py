@@ -17,14 +17,21 @@ urlpatterns = [
     path('home', views.home, name="home"),
     path('view-products', views.ProductView.as_view(), name='view-products'),
     path('search-form', views.SearchFilterView, name="search-filter"),
+    path('autosuggestion-title', views.autosuggestion_title, name="autosuggestion-title"),
     path('profile', views.profile, name="profile"),
     path("logout", views.logout),
     path('', views.index, name='auth'),
     path('', include("django.contrib.auth.urls")),
     path('', include("social_django.urls", namespace='social')),
-    # path('products', views.products, name='products')
-    path('product/<slug>/', views.ProductDetailView.as_view(), name='product'),
+    # path('product/<slug>/', views.ProductDetailView.as_view(), name='product'),
+    path('product/<slug>', views.products, name='product'),
     path('add-to-cart/<slug>', views.add_to_cart, name="add-to-cart"),
-    path('remove-from-cart/<slug>', views.remove_from_cart, name="remove-from-cart")
+    path('remove-all-from-cart/<slug>', views.remove_all_from_cart, name="remove-all-from-cart"),
+    path('remove-one-from-cart/<slug>', views.remove_one_from_cart, name="remove-one-from-cart"),
+    path('cart', views.cart_view, name='cart'),
+    path('add-to-wishlist/<slug>', views.add_to_wishlist, name="add-to-wishlist"),
+    path('wishlist', views.wishlist_view, name='wishlist'),
+    path('remove-all-from-cart-add-to-wishlist/<slug>', views.remove_all_from_cart_add_to_wishlist, name="remove-all-from-cart-add-to-wishlist"),
+    path('edit-profile', views.edit_profile, name="edit-profile")
     
 ]
