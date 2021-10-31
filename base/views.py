@@ -258,7 +258,7 @@ def add_to_cart(request, slug):
         product.available_units -= 1
         product.save()
         item_added_to_cart += 1
-        messages.info(request, "Added to cart.")
+        messages.info(request, "Created cart and added {0}!".format(product.title))
         return redirect("base:product", slug=slug)
 
     else:
@@ -273,7 +273,7 @@ def add_to_cart(request, slug):
             product.available_units -= 1
             product.save()
             item_added_to_cart += 1
-            messages.info(request, "Created cart and added {0}!".format(product.title))
+            messages.info(request, "Added {0} to your cart!".format(product.title))
             return redirect("base:cart")
 
         elif product.available_units != 0 and cart_order.products.filter(product__slug = product.slug).exists() == True:
@@ -290,6 +290,7 @@ def add_to_cart(request, slug):
             messages.info(request, "No more items left to be added to cart. Sorry :(")
             return redirect("base:product", slug=slug)
 
+
 @login_required
 def add_to_wishlist(request, slug):
 
@@ -305,7 +306,6 @@ def add_to_wishlist(request, slug):
         return redirect("base:wishlist")
     
     else:
-
         wishlist = wishlist_product_list[0]
         wishlist.products.add(wishlist_product)
         messages.info(request, "Added {0} to your wishlist!".format(product.title))
@@ -415,7 +415,7 @@ def wishlist_view(request):
     try:
         wishlist = Wishlist.objects.get(user=request.user)
         context = {
-            'wishlist': wishlist
+            'wishlist': wishlist,
         }
         request.session['wishlist_count_num'] = wishlist.products.count()
         return render(request, "base/wishlist-view.html", context=context)
