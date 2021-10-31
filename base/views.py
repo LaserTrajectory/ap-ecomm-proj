@@ -3,8 +3,8 @@ from django.http.response import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, request
 
-from base.forms import ReviewForm, UserProfileForm
-from .models import CartProduct, Product, Category, Rating, Cart, CartProduct, UserProfile, Wishlist
+from base.forms import UserProfileForm
+from .models import CartProduct, Product, Category, Rating, Cart, CartProduct, ReviewProduct, UserProfile, Wishlist
 from django.db.models import Q
 from django.views.generic import View
 from django.utils.decorators import method_decorator
@@ -194,12 +194,26 @@ def profile(request):
 def products(request, slug):
 
     object = get_object_or_404(Product, slug=slug)
-    review_form = ReviewForm()
+
+    if request.method == "POST":
+
+        rev_content = request.POST.get('review', '')
+
+        print("rev_content:", rev_content)
+
+        review = ReviewProduct.objects.create(product=object, user=request.user, review=rev_content)
+
+        return redirect("base:product", slug=slug)
+
+    review_list = ReviewProduct.objects.filter(product=object)
+
+    # user_meta = UserProfile.objects.filter(user=review_list.user)
 
     context = {
 
         "object": object,
-        "review": review_form
+        "review_list": review_list,
+        # "user_meta": user_meta
 
     }
 

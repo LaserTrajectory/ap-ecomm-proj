@@ -15,13 +15,6 @@ class UserProfile(models.Model):
 
         return "{0}'s user profile".format(self.user.username)
 
-class Review(models.Model):
-
-    name = models.CharField(max_length=1000)
-
-    def __str__(self):
-        return self.name
-
 class Category(models.Model):
 
     name = models.CharField(max_length=50)
@@ -44,7 +37,7 @@ class Product(models.Model):
     available_units = models.IntegerField(blank=False, default='')
     description = models.TextField(max_length=500, blank=False, default='')
     seller = models.TextField(max_length=100, blank=False)
-    reviews = models.ForeignKey(Review, on_delete=models.CASCADE)
+    # reviews = models.ForeignKey(Review, on_delete=models.CASCADE)
     categories = models.ForeignKey(Category, on_delete=models.CASCADE, default=True, null=False)
     ratings = models.ForeignKey(Rating, on_delete=models.CASCADE, blank=True, null=False)
     image = models.ImageField(upload_to='images/', default='images/default.jpg')
@@ -112,3 +105,16 @@ class Wishlist(models.Model):
     def __str__(self):
 
         return "{0}'s wishlist".format(self.user.username)
+
+class ReviewProduct(models.Model):
+
+    product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='reviews', on_delete=models.CASCADE)
+    
+    review = models.TextField(blank=True, null=True)
+
+    post_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+
+        return "{0}'s review for {1}".format(self.user.username, self.product.title)

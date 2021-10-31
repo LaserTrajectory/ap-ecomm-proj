@@ -80,13 +80,35 @@
       <hr>
 
       <div class="container">
-        <h3>Add a review! (CURRENTLY NOT FUNCTIONAL: TO BE ADDED)</h3>
-        <form method="post">
-          {{ review.name }}
-        </form>
-      </div>
 
-      <div class="container">
+        <h2>Reviews</h2>
+
+        <div>
+          {% for rev in review_list %}
+            <div>
+              <p>Date: {{ rev.post_date }} | User: {{ rev.user.username }}</p>
+              <p>{{ rev.review }}</p>
+            </div>
+          {% empty %}
+            <div>
+              <p>No reviews yet...</p>
+            </div>
+          {% endfor %}
+        </div>
+
+        <h3>Add a review</h3>
+
+        <form method="POST" action="">
+          {% csrf_token %}
+          <div class="form-group">
+            <div class="form-group">
+              <label for="exampleFormControlTextarea1">Example textarea</label>
+              <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" placeholder="Add a review here..." name="review"></textarea>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        
 
       </div>
 
@@ -105,10 +127,8 @@
           </p>
 
           <p>
-            <h5>Ratings and Reviews</h5>
+            <h5>Ratings</h5>
             <span>Rating: {{ object.ratings }}</span>
-            <br>
-            <span>Review: {{ object.reviews }}</span>
           </p>
 
         </div>
