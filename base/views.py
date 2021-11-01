@@ -173,7 +173,9 @@ def logout(request):
 def profile(request):
     user = request.user
     auth0user = user.social_auth.get(provider='auth0')
-    user_profile_obj = get_object_or_404(UserProfile, user=request.user)
+    user_profile_obj = UserProfile.objects.filter(user=request.user)
+    if user_profile_obj.exists() == False:
+        user_profile_obj = UserProfile.objects.create(user=request.user)
     userdata = {
         'user_id': auth0user.uid,
         'name': user.first_name,

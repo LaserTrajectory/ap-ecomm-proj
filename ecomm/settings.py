@@ -161,9 +161,9 @@ CORS_ORIGIN_WHITELIST = (
 project_folder = os.path.expanduser('/Users/aniruddhbhaskaran/Documents/Ashoka/AP/ecomm-proj') 
 load_dotenv(os.path.join(project_folder, '.env')) 
 
-SOCIAL_AUTH_AUTH0_DOMAIN = os.getenv("SOCIAL_AUTH_AUTH0_DOMAIN")
-SOCIAL_AUTH_AUTH0_KEY = os.getenv("SOCIAL_AUTH_AUTH0_KEY")
-SOCIAL_AUTH_AUTH0_SECRET = os.getenv("SOCIAL_AUTH_AUTH0_SECRET")
+SOCIAL_AUTH_AUTH0_DOMAIN = "dev-qeack6lg.us.auth0.com"
+SOCIAL_AUTH_AUTH0_KEY = "C0llWAjk2VhjBelmwy11gsxds2AQk6Lc"
+SOCIAL_AUTH_AUTH0_SECRET = "76stLBlwW0jIJSs7zQNTx4XAN068ka4_OeVYGi_8AeiutppfA6RUUatLDR0IK2bS"
 
 SOCIAL_AUTH_AUTH0_SCOPE = [
     'openid',
