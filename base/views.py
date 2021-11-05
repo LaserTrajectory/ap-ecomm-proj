@@ -23,9 +23,14 @@ from django.template.response import TemplateResponse
 
 from base import models
 
+from thefuzz import fuzz
+from thefuzz import process
+
 """
 Sources:
 https://www.youtube.com/watch?v=Xjty8q524Jo&list=PLLRM7ROnmA9F2vBXypzzplFjcHUaKWWP5&index=2
+https://github.com/justdjango/django-ecommerce
+https://towardsdatascience.com/fuzzy-string-matching-in-python-68f240d910fe
 
 """
 
@@ -95,6 +100,19 @@ def SearchFilterView(request):
     count = 1
     average_rating = 0
 
+    fuzz_match_title_array = []
+    fuzz_match_seller_array = []
+
+    title_list = []
+    for prod in queryset:
+        title_list.append(prod.title)
+    # print("title list:", title_list)
+    seller_list = []
+    for prod in queryset:
+        seller_list.append(prod.seller)
+    seller_list = list(set(seller_list))
+    print(seller_list)
+
     # print(type(rating_set))
 
     if title_contains != '' and title_contains is not None:
@@ -104,10 +122,6 @@ def SearchFilterView(request):
     elif seller_contains != '' and seller_contains is not None:
 
         queryset = queryset.filter(seller__icontains=seller_contains)
-
-    elif id_exact != '' and id_exact is not None:
-
-        queryset =  queryset.filter(id=id_exact)
 
     elif name_or_seller != '' and name_or_seller is not None:
 
@@ -139,19 +153,106 @@ def SearchFilterView(request):
 
         queryset = queryset.filter(ratings__name=rating)
 
+    if title_contains != '' and seller_contains == '':
+
+        fuzz_match_array = []
+        fuzz_score_array = []
+
+        title_return_list = []
+        for prod in queryset:
+            title_return_list.append(prod.title)
+
+        if len(title_return_list) == 0:
+            for x in title_list:
+                fuzz_score = fuzz.ratio(x, title_contains)
+                fuzz_match_array.append([x, fuzz_score])
+                fuzz_score_array.append(fuzz_score)
+
+        sorted_fuzz_score_array = sorted(fuzz_score_array, reverse=True)
+
+        print(fuzz_match_array)
+        print(sorted_fuzz_score_array)
+
+        for i in fuzz_match_array:
+
+            if i[1] == sorted_fuzz_score_array[0] or i[1] == sorted_fuzz_score_array[1]:
+
+                fuzz_match_title_array.append(i[0])
+
+            else:
+
+                continue
+            
+    # print("matches: ", fuzz_match_title_array)
+
+    if seller_contains != '' and title_contains == '':
+
+        seller_fuzz_match_array = []
+        seller_fuzz_score_array = []
+
+        seller_return_list = []
+
+        for prod in queryset:
+            seller_return_list.append(prod.seller)
+
+        print(seller_return_list)
+
+        if len(seller_return_list) == 0:
+            for x in seller_list:
+                fuzz_score = fuzz.ratio(x, seller_contains)
+                seller_fuzz_match_array.append([x, fuzz_score])
+                seller_fuzz_score_array.append(fuzz_score)
+
+        sorted_fuzz_score_array_seller = sorted(seller_fuzz_score_array, reverse=True)
+
+        print("sorted:", sorted_fuzz_score_array_seller)
+
+        for i in seller_fuzz_match_array:
+
+            if i[1] == sorted_fuzz_score_array_seller[0] or i[1] == sorted_fuzz_score_array_seller[1]:
+
+                fuzz_match_seller_array.append(i[0])
+
+            else:
+
+                continue
+
+    print("seller array:", fuzz_match_seller_array)
+
     context = {
         'queryset': queryset,
         'category_set': category_set,
         'rating_set': rating_set,
+        'fuzz_title_matches': fuzz_match_title_array,
+        'fuzz_seller_matches': fuzz_match_seller_array
     }
 
     context['average_rating'] = average_rating
     context['selected_category'] = category
     context['selected_rating'] = rating
+    context['title_search_term'] = title_contains
+    context['seller_search_term'] = seller_contains
 
     ratings_list = []
+    fuzz_match_title_array = []
+    fuzz_match_seller_array = []
 
     return render(request, "base/search_filter_form.html", context=context)
+
+
+def autosuggestion_title(request):
+
+    queryset = Product.objects.filter(title__icontains=request.GET.get('term'))
+
+    title_return_list = []
+    for prod in queryset:
+        title_return_list.append(prod.title)
+
+    # print("title return list:", title_return_list)
+    print("search term:", request.GET.get('term'))
+    print("len: ", len(title_return_list))
+    
+    return JsonResponse(title_return_list, safe=False)
 
 
 def index(request):
@@ -173,9 +274,12 @@ def logout(request):
 def profile(request):
     user = request.user
     auth0user = user.social_auth.get(provider='auth0')
-    user_profile_obj = UserProfile.objects.filter(user=request.user)
-    if user_profile_obj.exists() == False:
-        user_profile_obj = UserProfile.objects.create(user=request.user)
+    user_profile_obj = UserProfile.objects.get_or_create(user=user)[0]
+    ordered_cart = Cart.objects.filter(user=request.user, is_ordered=True)
+    current_cart = Cart.objects.filter(user=request.user, is_ordered=False)
+    current_wishlist = Wishlist.objects.filter(user=request.user)
+    # print(ordered_cart)
+    
     userdata = {
         'user_id': auth0user.uid,
         'name': user.first_name,
@@ -185,12 +289,36 @@ def profile(request):
 
     user_name = user.first_name
 
-    return render(request, 'base/profile.html', {
+    context = {
         'auth0User': auth0user,
         'userdata': userdata,
         'user_name': user_name,
         'user_profile_obj': user_profile_obj,
-    })
+    }
+
+    if ordered_cart.exists() == True:
+
+        ordered_products_list = []
+
+        for cart in ordered_cart:
+
+            for prod in cart.products.all():
+
+                ordered_products_list.append(prod) 
+        
+        context['ordered_products_list'] = ordered_products_list
+
+    if current_cart.exists() == True:
+
+        context['current_cart'] = current_cart[0]
+
+    if current_wishlist.exists() == True:
+
+        print(current_wishlist[0].products.all())
+
+        context['current_wishlist'] = current_wishlist[0]
+
+    return render(request, 'base/profile.html', context=context)
 
 
 def products(request, slug):
@@ -201,7 +329,7 @@ def products(request, slug):
 
         rev_content = request.POST.get('review', '')
 
-        print("rev_content:", rev_content)
+        # print("rev_content:", rev_content)
 
         review = ReviewProduct.objects.create(product=object, user=request.user, review=rev_content)
 
@@ -221,15 +349,6 @@ def products(request, slug):
 
 
     return render(request, "base/product.html", context)
-
-# def add_review(request, slug):
-
-#     new_review_form = ReviewForm(request.POST)
-
-#     if new_review_form.is_valid():
-
-#         new_review = new_review_form.save()
-
 
 class ProductDetailView(DetailView):
 
@@ -338,6 +457,7 @@ def remove_all_from_cart(request, slug):
 
             cart_product_to_remove = CartProduct.objects.filter(product=product, user=request.user)[0]
             cart_order.products.remove(cart_product_to_remove)
+            cart_product_to_remove.delete()
             product.available_units += item_added_to_cart 
             product.save()
             return_string = "{0} units of {1} were removed from your cart".format(item_added_to_cart, product.title)
@@ -351,12 +471,12 @@ def remove_one_from_cart(request, slug):
     product = get_object_or_404(Product, slug=slug)
     cart_orders_list = Cart.objects.filter(user=request.user, is_ordered=False)
     global initial_available_units
-    print("init avail units: ", initial_available_units)
-    print("prod avail units: ", product.available_units)
+    # print("init avail units: ", initial_available_units)
+    # print("prod avail units: ", product.available_units)
     
     if cart_orders_list.exists() == False:
 
-        messages.info(request, "{0} was not found in your cart.".format(product.title))
+        messages.info(request, "Your cart does not exist.")
         return redirect("base:product", slug=slug)
 
     else:
@@ -376,6 +496,11 @@ def remove_one_from_cart(request, slug):
 
                 cart_product_to_reduce.quantity -= 1
                 cart_product_to_reduce.save()
+
+                if cart_product_to_reduce.quantity == 0:
+
+                    cart_product_to_reduce.delete()
+
                 product.available_units += 1
                 product.save()
                 return_string = "1 unit of {0} removed from cart".format(product.title)
@@ -397,32 +522,147 @@ def cart_view(request):
         }
         # print(cart.products.count())
         request.session['cart_count_num'] = cart.products.count()
+        total_price = 0
+        for prod in cart.products.all():
+            total_price += (prod.product.price * prod.quantity)
+
+        context['total_price'] = total_price
+    
         return render(request, "base/cart-view.html", context=context)
         
+    except ObjectDoesNotExist:
+        request.session['cart_count_num'] = 0
+        messages.error(request, "Your cart is empty.")
+        return redirect("base:profile")
+
+@login_required
+def checkout(request):
+
+    try:
+        cart = Cart.objects.get(user=request.user, is_ordered=False)
+        user_profile = UserProfile.objects.get(user=request.user)
+        context = {
+            'cart': cart,
+            'user': user_profile
+        }
+        # print(cart.products.count())
+        total_price = 0
+        for prod in cart.products.all():
+            total_price += (prod.product.price * prod.quantity)
+
+        context['total_price'] = total_price
+
+        if request.GET.get('order') == 'order':
+
+            cart.is_ordered = True
+            cart.save()
+            request.session.cart_count_num = 0
+            return redirect("base:order-summary")
+
+        return render(request, "base/checkout.html", context=context)
+
     except ObjectDoesNotExist:
         messages.error(request, "You haven't created a cart yet.")
         return redirect("base:profile")
 
-def autosuggestion_title(request):
+@login_required
+def order_summary(request):
 
-    queryset = Product.objects.filter(title__icontains=request.GET.get('term'))
-    title_return_list = []
-    for prod in queryset:
-        title_return_list.append(prod.title)
-    return JsonResponse(title_return_list, safe=False)
+    cart = Cart.objects.filter(user=request.user, is_ordered=True)
+
+    recommendations = Cart.objects.filter(is_ordered=True)
+
+    recomm_prod_list = []
+
+    for x in recommendations:
+
+        for prod in x.products.all():
+
+            recomm_prod_list.append(prod.product.title)
+
+    total_price = 0
+    for prod in cart[0].products.all():
+        total_price += (prod.product.price * prod.quantity)
+
+    user_profile = UserProfile.objects.get(user=request.user)
+
+    context = {
+        'cart': cart[0],
+        'user': user_profile
+    }
+
+    context['total_price'] = total_price
+
+    cart_prod_list = []
+    for cart_inst in cart:
+        prod_list = cart_inst.products.all()
+        for x in prod_list:
+            cart_prod_list.append(x.product.title)
+    print(cart_prod_list)
+
+    recomm_filtered = recomm_prod_list
+
+    for prod in recomm_prod_list:
+
+        for prod_2 in cart_prod_list:
+
+            if prod == prod_2:
+
+                recomm_filtered.remove(prod)
+
+    context['recomm_filtered'] = recomm_filtered
+
+    return render(request, "base/order-summary.html", context=context)
 
 @login_required
 def wishlist_view(request):
 
     try:
         wishlist = Wishlist.objects.get(user=request.user)
+
+        print(wishlist.products.all())
+
+        all_wishlists = Wishlist.objects.all()
+
+        interest_keys = []
+        interest_vals = []
+
+        wishlist_entries = []
+
+        for wishlist in all_wishlists:
+            prods = wishlist.products.all()
+            for prod in prods:
+                wishlist_entries.append(prod.product.title)
+
+        wish_set = set(wishlist_entries)
+
+        for i in wish_set:
+            count = 0
+            for j in wishlist_entries:
+
+                if i == j:
+
+                    count += 1
+
+            interest_keys.append(i)
+            interest_vals.append(count)
+
+        # print(interest_keys)
+        # print(interest_vals)
+
+        interest_dict = dict(zip(interest_keys, interest_vals))
+        # print(interest_dict)
+
         context = {
             'wishlist': wishlist,
+            'interest_dict': interest_dict
         }
         request.session['wishlist_count_num'] = wishlist.products.count()
+
         return render(request, "base/wishlist-view.html", context=context)
         
     except ObjectDoesNotExist:
+        request.session['wishlist_count_num'] = 0
         messages.error(request, "You haven't created a wishlist yet.")
         return redirect("base:profile")
 
@@ -476,4 +716,19 @@ def edit_profile(request):
     }
 
     return render(request, "base/edit-profile.html", context=context)
+
+@login_required
+def my_orders(request):
+
+    user_profile = get_object_or_404(UserProfile, user=request.user)
+
+    carts_ordered = Cart.objects.filter(user=request.user, is_ordered=True)
+    print(carts_ordered)
+
+    context = {
+        'user': user_profile,
+        'carts': carts_ordered
+    }
+
+    return render(request, "base/my-orders.html", context=context)
 

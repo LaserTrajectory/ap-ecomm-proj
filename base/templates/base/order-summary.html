@@ -1,0 +1,25 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+    
+    <h2>Your order was successfully placed!</h2>
+
+    <hr>
+
+    <div class="container border mt-2">
+        <a href="{% url 'base:profile' %}">Back to my profile</a>
+    </div>
+    <div class="container border mt-2">
+        <a href="{% url 'base:home' %}">Back to the home page</a>
+    </div>
+
+    <h3>Customers also bought...</h3>
+
+    <div class="container">
+        {% for prod in recomm_filtered %}
+            <p>{{ prod }}</p>
+        {% endfor %}
+    </div>
+
+
+{% endblock content %}

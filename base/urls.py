@@ -32,6 +32,8 @@ urlpatterns = [
     path('add-to-wishlist/<slug>', views.add_to_wishlist, name="add-to-wishlist"),
     path('wishlist', views.wishlist_view, name='wishlist'),
     path('remove-all-from-cart-add-to-wishlist/<slug>', views.remove_all_from_cart_add_to_wishlist, name="remove-all-from-cart-add-to-wishlist"),
-    path('edit-profile', views.edit_profile, name="edit-profile")
-    
+    path('edit-profile', views.edit_profile, name="edit-profile"),
+    path('checkout', views.checkout, name="checkout"),
+    path('order', views.order_summary, name="order-summary"),
+    path('my-orders', views.my_orders, name="my-orders")
 ]
