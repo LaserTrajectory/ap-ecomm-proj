@@ -1,11 +1,11 @@
 body {
-    background: #fafafa;
+    background: #000000;
     color: #333333;
     margin-top: 5rem;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    color: #444444;
+    color: #ffffff;
   }
   
   ul {
@@ -16,12 +16,16 @@ body {
     background-color: #1a84d0;
   }
   
+  .bg-black {
+    background-color: #000000;
+  }
+
   .site-header .navbar-nav .nav-link {
-    color: #fff;
+    color: rgb(177, 182, 184);
   }
   
   .site-header .navbar-nav .nav-link:hover {
-    color: #ffffff;
+    color: #dbdada;
   }
   
   .site-header .navbar-nav .nav-link.active {
