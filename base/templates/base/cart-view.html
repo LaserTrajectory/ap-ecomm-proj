@@ -5,4 +5,9 @@
     {% for cart_order in cart.products.all %}
         <p> <a href="{{ cart_order.product.get_abs_url }}">{{ cart_order.product.title }}</a> | {{ cart_order.product.price }} | {{ cart_order.quantity }}</p>
     {% endfor %}
+    <p>Total price: {{ total_price }}</p>
+    <form action="{% url 'base:checkout' %}" method="POST">
+        {% csrf_token %}
+        <button type="submit" value="checkout" name="checkout" class="btn btn-primary">Proceed to checkout</button>
+    </form>
 {% endblock content %}

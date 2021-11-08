@@ -1,0 +1,23 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+
+    <h2>My Orders</h2>
+
+    {% for cart in carts %}
+        
+        <p>Cart: </p>
+
+        {% for prod in cart.products.all %}
+            <p>{{ prod.product.title }}</p>
+        {% endfor %}
+
+        <hr>
+
+    {% empty %}
+    
+    <p>You haven't ordered anything yet! <a href="{% url 'base:view-products'%}">View products</a></p>
+
+    {% endfor %} 
+
+{% endblock content %}

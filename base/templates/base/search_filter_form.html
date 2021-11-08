@@ -2,10 +2,23 @@
 
 {% block content%}
     <h2>Search Products</h2>
+    {% if title_search_term != '' and seller_search_term == '' %}
+    <h2>Searching for product: "{{ title_search_term }}"</h2>
+    {% endif %}
+    {% if seller_search_term != '' and title_search_term == '' %}
+    <h2>Searching for seller: "{{ seller_search_term }}"</h2>
+    {% endif %}
     <form action="search-form" method="GET">
         <input class="form-control py-2 border-right-0 border mt-2 mb-2" type="search" name="title_contains" placeholder="Title contains..." id="tags" />
+        {% for match in fuzz_title_matches %}
+            <p>Did you mean <a href="http://127.0.0.1:8000/search-form?title_contains={{ match }}&seller_contains=&id_exact=&name_or_seller=&view_price_min=&view_price_max=&category=Choose...&rating=Choose...">{{ match }}</a>?</p>
+            {% empty %}
+        {% endfor %}
         <input class="form-control py-2 border-right-0 border mt-2 mb-2" type="search" name="seller_contains" placeholder="Seller contains..." />
-        <input class="form-control py-2 border-right-0 border mt-2 mb-2" type="search" name="id_exact" placeholder="ID is..." />
+        {% for match in fuzz_seller_matches %}
+            <p>Did you mean <a href="http://127.0.0.1:8000/search-form?title_contains=&seller_contains={{ match }}&id_exact=&name_or_seller=&view_price_min=&view_price_max=&category=Choose...&rating=Choose...">{{ match }}</a>?</p>
+            {% empty %}
+        {% endfor %}
         <input class="form-control py-2 border-right-0 border mt-2 mb-2" type="search" name="name_or_seller" placeholder="Title or seller contains..." />
         <div class="row">
             <div class="form-group col-md-4 col-lg-4">

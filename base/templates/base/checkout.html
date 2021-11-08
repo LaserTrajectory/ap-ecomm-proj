@@ -1,0 +1,36 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+
+    <h3>Checkout</h3>
+    
+    <p>Hello there this is checkout for {{ user.display_name }}</p>
+
+    <p>Delivery to {{ user.delivery_address }}</p>
+
+    <a href="{% url 'base:edit-profile' %}">Edit details</a>
+
+    <h3 class="mt-2">Confirm your order</h3>
+    {% for cart_order in cart.products.all %}
+        <p> <a href="{{ cart_order.product.get_abs_url }}">{{ cart_order.product.title }}</a> | {{ cart_order.product.price }} | {{ cart_order.quantity }}</p>
+    {% endfor %}
+
+    <div class="container border">
+        <p class="mt-2">Total price: {{ total_price }}</p>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12 text-center">
+            <hr>
+            <form action="{% url 'base:cart' %}">
+                <button class="btn btn-warning btn-md btn-block">Back to cart</button>
+            </form>
+            <hr>
+            <form action="#" method="GET"> 
+                {% csrf_token %}
+                <input type="submit" value="order" name="order"/>
+            </form>
+        </div>
+    </div>
+
+{% endblock content %}
