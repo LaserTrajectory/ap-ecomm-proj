@@ -63,7 +63,11 @@ https://towardsdatascience.com/fuzzy-string-matching-in-python-68f240d910fe
 
 def home(request):
     
-    return render(request, 'base/home.html')
+    context = {}
+
+    context['picture'] = request.user.social_auth.get(provider='auth0').extra_data['picture']
+
+    return render(request, 'base/home.html', context=context)
 
 
 def product_page(request):
@@ -73,6 +77,8 @@ def product_page(request):
     context = {
         'queryset': queryset
     }
+
+    context['picture'] = request.user.social_auth.get(provider='auth0').extra_data['picture']
 
     return render(request, 'base/prod-view.html', context=context)
 
@@ -95,6 +101,8 @@ def SearchFilterView(request):
     view_price_max = request.GET.get('view_price_max')
     category = request.GET.get('category')
     rating = request.GET.get('rating')
+    nav_search = request.GET.get('nav_search')
+    print("nav search = ", nav_search)
 
     ratings_list = []
     count = 1
@@ -118,6 +126,10 @@ def SearchFilterView(request):
     if title_contains != '' and title_contains is not None:
 
         queryset = queryset.filter(title__icontains=title_contains)
+
+    elif nav_search != '' and nav_search is not None:
+
+        queryset = queryset.filter(title__icontains=nav_search)
 
     elif seller_contains != '' and seller_contains is not None:
 
@@ -219,6 +231,17 @@ def SearchFilterView(request):
 
     print("seller array:", fuzz_match_seller_array)
 
+    print("title array: ", fuzz_match_title_array)
+
+    print("this queryset", queryset)
+
+    nav_search_check = 0
+
+    if nav_search is not None and not queryset:
+
+        nav_search_check = 1
+
+
     context = {
         'queryset': queryset,
         'category_set': category_set,
@@ -232,6 +255,9 @@ def SearchFilterView(request):
     context['selected_rating'] = rating
     context['title_search_term'] = title_contains
     context['seller_search_term'] = seller_contains
+    context['nav_search_term'] = nav_search
+    context['nav_search_check'] = nav_search_check
+    context['picture'] = request.user.social_auth.get(provider='auth0').extra_data['picture']
 
     ratings_list = []
     fuzz_match_title_array = []
@@ -250,10 +276,9 @@ def autosuggestion_title(request):
 
     # print("title return list:", title_return_list)
     print("search term:", request.GET.get('term'))
-    print("len: ", len(title_return_list))
+    # print("len: ", len(title_return_list))
     
     return JsonResponse(title_return_list, safe=False)
-
 
 def index(request):
     user = request.user
@@ -318,6 +343,8 @@ def profile(request):
 
         context['current_wishlist'] = current_wishlist[0]
 
+    context['picture'] = request.user.social_auth.get(provider='auth0').extra_data['picture']
+
     return render(request, 'base/profile.html', context=context)
 
 
@@ -347,6 +374,7 @@ def products(request, slug):
 
     }
 
+    context['picture'] = request.user.social_auth.get(provider='auth0').extra_data['picture']
 
     return render(request, "base/product.html", context)
 
@@ -527,6 +555,7 @@ def cart_view(request):
             total_price += (prod.product.price * prod.quantity)
 
         context['total_price'] = total_price
+        context['picture'] = request.user.social_auth.get(provider='auth0').extra_data['picture']
     
         return render(request, "base/cart-view.html", context=context)
         
@@ -558,6 +587,8 @@ def checkout(request):
             cart.save()
             request.session.cart_count_num = 0
             return redirect("base:order-summary")
+
+        context['picture'] = request.user.social_auth.get(provider='auth0').extra_data['picture']
 
         return render(request, "base/checkout.html", context=context)
 
@@ -592,6 +623,7 @@ def order_summary(request):
     }
 
     context['total_price'] = total_price
+    context['picture'] = request.user.social_auth.get(provider='auth0').extra_data['picture']
 
     cart_prod_list = []
     for cart_inst in cart:
@@ -659,6 +691,8 @@ def wishlist_view(request):
         }
         request.session['wishlist_count_num'] = wishlist.products.count()
 
+        context['picture'] = request.user.social_auth.get(provider='auth0').extra_data['picture']
+
         return render(request, "base/wishlist-view.html", context=context)
         
     except ObjectDoesNotExist:
@@ -715,6 +749,8 @@ def edit_profile(request):
         'user': user_profile_obj
     }
 
+    context['picture'] = request.user.social_auth.get(provider='auth0').extra_data['picture']
+
     return render(request, "base/edit-profile.html", context=context)
 
 @login_required
@@ -729,6 +765,8 @@ def my_orders(request):
         'user': user_profile,
         'carts': carts_ordered
     }
+
+    context['picture'] = request.user.social_auth.get(provider='auth0').extra_data['picture']
 
     return render(request, "base/my-orders.html", context=context)
 
