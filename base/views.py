@@ -283,7 +283,7 @@ def autosuggestion_title(request):
 def index(request):
     user = request.user
     if user.is_authenticated:
-        return render(request, 'base/profile.html')
+        return render(request, 'base/home.html')
     else:
         return render(request, 'base/index.html')
 
