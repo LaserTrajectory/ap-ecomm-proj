@@ -15,7 +15,7 @@ app_name = 'base'
 
 urlpatterns = [
     path('home', views.home, name="home"),
-    path('view-products', views.ProductView.as_view(), name='view-products'),
+    path('view-products', views.product_page, name='view-products'),
     path('search-form', views.SearchFilterView, name="search-filter"),
     path('autosuggestion-title', views.autosuggestion_title, name="autosuggestion-title"),
     path('profile', views.profile, name="profile"),

@@ -75,12 +75,12 @@ def product_page(request):
     queryset = Product.objects.all()
 
     context = {
-        'queryset': queryset
+        'object_list': queryset
     }
 
     context['picture'] = request.user.social_auth.get(provider='auth0').extra_data['picture']
 
-    return render(request, 'base/prod-view.html', context=context)
+    return render(request, 'base/product_list.html', context=context)
 
 
 class ProductView(ListView):
@@ -581,7 +581,7 @@ def checkout(request):
 
         context['total_price'] = total_price
 
-        if request.GET.get('order') == 'order':
+        if request.GET.get('order') == 'Order':
 
             cart.is_ordered = True
             cart.save()

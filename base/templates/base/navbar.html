@@ -1,6 +1,6 @@
 <header class="site-header">
-  <nav class="navbar navbar-expand-lg navbar-dark" id="navbar" style="background-color: #8eb9d8;">
-    <a class="navbar-brand" href="{% url 'base:home' %}" style="color: black;">Memestore</a>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark" id="navbar">
+    <a class="navbar-brand ml-3 mt-1" href="{% url 'base:home' %}" style="color: #18b4c9"><h3>Phlipcart</h3></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -8,9 +8,9 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item active">
-          <a class="nav-link" href="{% url 'base:view-products' %}">View Products <span class="sr-only">(current)</span></a>
+          <!--<a class="nav-link" href="{% url 'base:view-products' %}">View Products <span class="sr-only">(current)</span></a>-->
         </li>
-        <li class="nav-item active">
+        <!-- <li class="nav-item active">
           <a class="nav-link" href="{% url 'base:search-filter' %}">Search Products</a>
         </li>
         <li class="nav-item active">
@@ -21,17 +21,25 @@
         </li>
         <li class="nav-item active">
           <a class="nav-link" href="{% url 'base:my-orders' %}">My Orders</a>
-        </li>
+        </li> -->
         <!-- <li class="nav-item active">
           <a class="nav-link" href="{% url 'base:profile' %}">My Profile</a>
         </li> -->
       </ul>
       <form class="form-inline my-2 my-lg-0" action="search-form">
         <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="nav_search">
-        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        <button class="btn bg-steel my-2 my-sm-0" type="submit">Search</button>
       </form>
     </div>
     <li class="nav-item dropdown nav-user"> <a class="nav-link nav-user-img" href="{% url 'base:profile' %}" id="navbarDropdownMenuLink2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="{{ picture }}" alt="" class="user-avatar-md rounded-circle" height="32px" width="32px"></a></li>
+    <div class="btn-group">
+      <button type="button" class="btn dropdown-toggle bg-steel" data-bs-toggle="dropdown"></button>
+      <div class="dropdown-menu dropdown-menu-right bg-dark">
+        <a class="dropdown-item bg-dark" href="{% url 'base:cart' %}" style="color: white;">Cart</a>
+        <a class="dropdown-item bg-dark" href="{% url 'base:wishlist' %}" style="color: white;"> Wishlist</a>
+        <a class="dropdown-item bg-dark" href="{% url 'base:my-orders' %}" style="color: white;"> My Orders</a>
+      </div>
+    </div>  
   </nav>
   </header>
 

@@ -15,21 +15,26 @@
         <p> <a href="{{ cart_order.product.get_abs_url }}">{{ cart_order.product.title }}</a> | {{ cart_order.product.price }} | {{ cart_order.quantity }}</p>
     {% endfor %}
 
-    <div class="container border">
+    <div class="container border text-right">
         <p class="mt-2">Total price: {{ total_price }}</p>
     </div>
 
     <div class="row">
-        <div class="col-sm-12 text-center">
-            <hr>
+
+        <div class="col-sm-6 text-center">
+        <hr>
             <form action="{% url 'base:cart' %}">
-                <button class="btn btn-warning btn-md btn-block">Back to cart</button>
+                <button class="btn btn-warning btn-lg btn-block mx-auto" style="width:300px">Back to cart</button>
             </form>
+        </div>
+        <div class="col-sm-6 text-center">
             <hr>
-            <form action="#" method="GET"> 
+            <form action="" method="GET"> 
                 {% csrf_token %}
-                <input type="submit" value="order" name="order"/>
+                <input type="submit" value="Order" name="order" class="btn btn-warning btn-lg btn-block mx-auto" style="width:300px"/>
             </form>
+        </div>
+
         </div>
     </div>
 

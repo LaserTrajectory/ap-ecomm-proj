@@ -1,6 +1,9 @@
 {% extends "base/base.html" %}
 
 {% block content%}
+<div class="container mt-3">
+    <button type="button" class="btn btn-primary mb-3" data-bs-toggle="collapse" data-bs-target="#filters">Show filters</button>
+    <div id="filters" class="collapse">
     <h2>Search Products</h2>
     {% if nav_search_term != '' and nav_search_check == 1 %}
         <h4>No searches matched "{{ nav_search_term }}". Try our advanced search below!</h4>
@@ -59,6 +62,10 @@
         <button type="submit" class="btn btn-outline-primary mt-2">Search</button>
         <a class="nav-item nav-link" href="{% url 'base:search-filter' %}">Clear</a>
     </form>
+    </div>
+</div>
+
+    
 
     <hr>
 
@@ -71,6 +78,7 @@
         <div><p>Filtering on rating: {{selected_rating}}</p></div>
         <hr>
     {% endif %}
+
 
     <div class="row">
         <ul>

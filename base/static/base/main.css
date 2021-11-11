@@ -1,6 +1,6 @@
 body {
     background: #fafafa00;
-    color: #333333;
+    color: #aaaaaa;
     background-color: #78c2c9;
     /* margin-top: 5rem; */
   }
@@ -14,16 +14,20 @@ body {
   } */
 
   .bg-steel {
-    background-color: #c91818;
+    background-color: #18b4c9;
+  }
+
+  .bg-black {
+    background-color: rgb(0, 0, 0);
   }
   
   div ul.navbar-nav.mr-auto li.nav-item.active a {
-    color: rgb(0, 0, 0);
+    color: rgb(167, 167, 167);
   }
 
   
   div ul.navbar-nav.mr-auto li.nav-item.active a:hover {
-    color: purple;
+    color: rgb(194, 194, 194);
   }
   
   .site-header .navbar-nav .nav-link.active {
