@@ -3,7 +3,7 @@
 {% block content %}
     <h3>Your wishlist</h3>
     {% for wishlist_inst in wishlist.products.all %}
-        <div class="container border border-3 mt-2">
+        <div class="container border border-3 mt-2 pt-2 pb-2">
             <p class="pt-2"> <a href="{{ wishlist_inst.product.get_abs_url }}">{{ wishlist_inst.product.title }}</a> | {{ wishlist_inst.product.price }}</p>
             <p>People interested: 
                 {% for key, val in interest_dict.items %}

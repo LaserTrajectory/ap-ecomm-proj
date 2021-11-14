@@ -2,13 +2,13 @@
 
 {% block content %}
 
-<form method="post">
-    {% csrf_token %}
-    Current display name: {{ user.display_name }} | Change to: {{ form.display_name }}
-    <br>
-    Current delivery address: {{ user.delivery_address }} | Change to: {{ form.delivery_address }}
-    <br>
-    <input type="submit" value="Save Changes">
-</form>
+    <form method="post">
+        {% csrf_token %}
+        Current display name: {{ user.display_name }} | Change to: {{ form.display_name }}
+        <br>
+        Current delivery address: {{ user.delivery_address }} | Change to: {{ form.delivery_address }}
+        <br>
+        <input type="submit" value="Save Changes">
+    </form>
 
 {% endblock content %}
