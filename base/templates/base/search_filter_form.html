@@ -1,9 +1,158 @@
 {% extends "base/base.html" %}
 
 {% block content%}
+
+<style>
+    
+    body{
+      background-size: cover;
+    }
+    
+    .product-grid{
+      font-family: tahoma;
+      text-align: center;
+      overflow: hidden;
+      position: relative;
+      border: 3px solid white;
+      margin-top: 50px;
+    }
+    
+    .product.grid:before{
+      content:'';
+      height: 100%;
+      width: 100%;
+      position : absolute;
+      left: 0;
+      top: 0;
+      z-index: 1;
+      transition: all 0.3s ease 0s;     
+    }
+    
+    .product-grid:hover:before{
+      background-color: rgba(0, 0, 0, 0.75)
+    }
+    
+    .product-grid .product-image{
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .product-grid .product-image a{
+      display: block;
+    }
+    
+    .product-grid .product-image img{
+      width: 100%;
+      height: auto;
+    }
+    
+    .product-discount-label{
+      color: white;
+      background-color: #18b4c9;
+      font-size: 13px;
+      letter-spacing: 1px;
+      padding: 6px 12px;
+      border-radius: 5px;
+      position: absolute;
+      left: 5px;
+      top: 5px;
+    }
+    
+    .product-grid .social{
+      width: 100%;
+      padding: 30px 0;
+      margin: 0;
+      transform: translateX(-50%) translateY(-50%);
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      z-index: 2;
+    }
+    
+    .product-grid .social li{
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(300%);
+      transition: all 0.5s ease 0s;     
+    }
+    
+    .product-grid .social li:nth-child(2){
+      transition-delay: 0.05s;
+    }
+    
+    .product-grid .social li:nth-child(3){
+      transition-delay: 0.13s;
+    }
+
+    .product-grid:hover .social li{
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .product-grid .social li a{
+      color: #000;
+      background-color: #fff;
+      line-height: 50px;
+      width: 50px;
+      height: 50px;
+      margin: 0 2x 10px;
+      border-radius: 50%;
+      display: block;
+      position: relative;
+      z-index: 2;
+      transition: all 0.3s;
+    }
+    
+    .product-grid .social li a:hover{
+      color: white;
+      background-color:#18b4c9;
+    }
+    
+    .product.grid .product-content{
+      padding: 18px;
+      position: relative;
+      z-index: 2;
+      background-color: white;
+    }
+    
+    .product-grid .title{
+      font-size: 17px;
+      font-weight: 500;
+      margin: 15px 0px 5px 0px;
+    }
+
+    .product-grid .price{
+      font-size: 15px;
+      font-weight: 500;
+      margin: 10px 0 5 0;  
+    }
+    
+    .product-grid .availability{
+      font-size: 15px;
+      font-weight: 500;
+      margin: 10px 0 100 0;  
+    }
+
+    .product-grid .title a{
+      color: #fff;
+    }
+    
+    .product-grid .title a:hover{
+      color: #fa8231;
+    }
+    
+    .product-grid .price{
+      color: #fa8231;
+    }
+    
+    .product-grid .rating{
+      top: 30px;
+      bottom: 20px;
+    }
+    
+  </style>
+  
 <div class="container mt-3">
-    <button type="button" class="btn btn-primary mb-3" data-bs-toggle="collapse" data-bs-target="#filters">Show filters</button>
-    <div id="filters" class="collapse">
     <h2>Search Products</h2>
     {% if nav_search_term != '' and nav_search_check == 1 %}
         <h4>No searches matched "{{ nav_search_term }}". Try our advanced search below!</h4>
@@ -17,6 +166,8 @@
     {% if seller_search_term == '' and title_search_term == '' %}
     <h2>Searching for product: "{{ nav_search_term }}"</h2>
     {% endif %}
+    <button type="button" class="btn btn-primary mb-3" data-bs-toggle="collapse" data-bs-target="#filters" aria-expanded="true">View advanced search filters</button>
+    <div id="filters" class="collapse" aria-expanded="true">
     <form action="search-form" method="GET">
         <input class="form-control py-2 border-right-0 border mt-2 mb-2" type="search" name="title_contains" placeholder="Title contains...(autofill + fuzzy search)" id="tags" />
         {% for match in fuzz_title_matches %}
@@ -80,31 +231,66 @@
     {% endif %}
 
 
-    <div class="row">
-        <ul>
+    <div class="container">
+        <div class="row">
             {% for prod in queryset %}
-            <article class="media content-section">
-                <div class="media-body">
-                <div class="article-metadata">
-                    <a class="mr-2" href="#">{{ prod.seller }}</a>
-                    <small>|</small>
-                    <small class="text-muted">{{ prod.price }}</small>
-                    <small>|</small>
-                    <small class="text-muted">{{ prod.kind }}</small>
+            <div class="col-lg-4">
+                <div class="product-grid">
+                  <div class="product-image">
+                    <a <href="">
+                      <img src="{{ prod.image.url }}" alt="" width="200" height="200">
+                    </a>
+                    <span class="product-discount-label">
+                      -20%
+                    </span>
+                  </div>
+                  <div class="product-content">
+                    <h3 class="title">
+                      <a class="article-title" href="{{ prod.get_abs_url }}">{{ prod.title }}</a>
+                    </h3>
+                    <div class="price">
+                      ${{ prod.price }}
+                    </div>
+                    <div class="rating">
+                      <style>
+                        .fa.fa-star{
+                          color: yellow;
+                          border-color: black;
+                        }
+                      </style>
+                      <i class="fa fa-star"></i>
+                      <i class="fa fa-star"></i>
+                      <i class="fa fa-star"></i>
+                      <i class="fa fa-star"></i>
+                      <i class="fa fa-star-o"></i> 
+                      <span class="ml-1">{{ prod.ratings }} <a href="#!" class="material-tooltip-main card-link" data-toggle="tooltip" data-placement="top" title="Read reviews">(542 reviews)</a></span>
+      </ul>
+                    </div>
+                    <div class="availability"> 
+                      Availability: {{ prod.available_units }}
+                    </div>
+                  </div>
+                  <ul class="social">
+                    <li>
+                      <a href="{{ prod.get_abs_url }}" data-tip="quick view">
+                        <i class="fa fa-eye"></i>
+                      </a>
+                    </li>
+                    
+                    <li>
+                      <a href="{{ prod.get_add_to_wishlist_url }}" data-tip="wishlist">
+                        <i class="fa fa-heart"></i>
+                      </a>
+                    </li>
+                    
+                    <li>
+                      <a href="{{ prod.get_add_to_cart_url }}" data-tip="add to cart">
+                        <i class="fa fa-shopping-cart"></i>
+                      </a>
+                    </li>
+                  </ul>
                 </div>
-                <!-- <span>
-                    {% for cat in product.categories.all %}
-                        {{ cat }}
-                    {% endfor %}
-                </span> -->
-                <h2><a class="article-title" href="{{ prod.get_abs_url }}">{{ prod.title }}</a></h2>
-                <p class="article-content">{{ prod.description }}</p>
-                <p class="article-content">Availaible units: {{ prod.available_units }}</p>
-                <p class="article-content">Category: {{ prod.categories }}</p>
-                <p class="article-content">Rating: {{ prod.ratings }}</p>
-                </div>
-            </article>
-            <hr>
+              </div>
             {% endfor %}
         </ul>
     </div>

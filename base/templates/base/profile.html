@@ -24,40 +24,39 @@
 
         <hr>
   
-        <h4>Your Cart</h4>
+        <div class="container border border-white p-3">
 
-        {% for prod in current_cart.products.all %}
+            <h4>Your Cart</h4>
 
-            {{ prod.product.title }} | {{ prod.product.seller }} | {{ prod.product.price }}
+            {% for prod in current_cart.products.all %}
+                {{ prod.product.title }} | {{ prod.product.seller }} | {{ prod.product.price }}
+            {% empty %}
+                Your cart is empty! <a href="{% url 'base:view-products'%}">Browse products</a>
+            {% endfor %}
 
-        {% empty %}
-
-            Your cart is empty! <a href="{% url 'base:view-products'%}">Browse products</a>
-
-        {% endfor %}
-
-        <hr>
-
-        <h4>Your Wishlist</h4>
-
-        {% for wish in current_wishlist.products.all %}
-
-            <p>{{ wish.product.title }} | {{ wish.product.seller }} | {{ wish.product.price }}</p>
-
-        {% empty %}
-
-            Your wishlist is empty!
-
-        {% endfor %}
+        </div>
 
         <hr>
 
-        <h4>Your Orders</h4>
-        {% for cart_order in ordered_products_list %}
-        <p>{{ cart_order.product.title }} | {{ cart_order.product.price }} | {{ cart_order.product.seller }}</p>
-        {% empty %}
-        You haven't ordered anything yet! <a href="{% url 'base:cart' %}">Checkout my cart</a>
-        {% endfor %}
+        <div class="container border border-white p-3">
+            <h4>Your Wishlist</h4>
+            {% for wish in current_wishlist.products.all %}
+                <p>{{ wish.product.title }} | {{ wish.product.seller }} | {{ wish.product.price }}</p>
+            {% empty %}
+                Your wishlist is empty!
+            {% endfor %}
+        </div>
+
+        <hr>
+
+        <div class="container border border-white p-3">
+            <h4>Your Orders</h4>
+            {% for cart_order in ordered_products_list %}
+            <p>{{ cart_order.product.title }} | {{ cart_order.product.price }} | {{ cart_order.product.seller }}</p>
+            {% empty %}
+            You haven't ordered anything yet! <a href="{% url 'base:cart' %}">Checkout my cart</a>
+            {% endfor %}
+        </div>
         
     </div>
     
