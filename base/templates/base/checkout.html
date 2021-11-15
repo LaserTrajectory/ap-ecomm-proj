@@ -4,20 +4,52 @@
 
     <h3>Checkout</h3>
     
-    <p>Hello there this is checkout for {{ user.display_name }}</p>
+    <p>Checking out {{ user.display_name }}'s cart</p>
 
     <p>Delivery to {{ user.delivery_address }}</p>
 
-    <a href="{% url 'base:edit-profile' %}">Edit details</a>
+    <form action="{% url 'base:edit-profile' %}">
+        <button class="btn btn-warning btn-lg btn-block mx-auto float-left" style="width:300px">Edit profile details</button>
+    </form>
 
-    <h3 class="mt-2">Confirm your order</h3>
-    {% for cart_order in cart.products.all %}
-        <p> <a href="{{ cart_order.product.get_abs_url }}">{{ cart_order.product.title }}</a> | {{ cart_order.product.price }} | {{ cart_order.quantity }}</p>
-    {% endfor %}
-
-    <div class="container border text-right">
-        <p class="mt-2">Total price: {{ total_price }}</p>
-    </div>
+    <section class="pt-5 pb-5">
+        <div class="container" style="color: white;">
+          <div class="row w-100" style="color: white;">
+              <div class="col-lg-12 col-md-12 col-12" style="color: white;">
+                  <h3 class="display-5 mb-2 text-center">Check out my cart</h3>
+                  <p class="mb-5 text-center">
+                      <i class="text-info font-weight-bold">{{ request.session.cart_count_num }}</i> items in your wishlist</p>
+                  <table id="shoppingCart" class="table table-condensed table-responsive">
+                      <thead>
+                          <tr>
+                              <th style="width:60%; color: white;">Product</th>
+                              <th style="width:12%; color: white;">Price</th>
+                              <th style="width:10%; color: white;">Quantity</th>
+                              <th style="width:16%"></th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          {% for cart_order in cart.products.all %}
+                          <tr>
+                              <td data-th="Product">
+                                  <div class="row">
+                                      <div class="col-md-9 text-left mt-sm-2">
+                                          <h4 style="color: white;"><a href="{{ cart_order.product.get_abs_url }}">{{ cart_order.product.title }}</a></h4>
+                                          <p class="font-weight-light" style="color: white;">{{ cart_order.product.seller }}</p>
+                                      </div>
+                                  </div>
+                              </td>
+                              <td data-th="Price" style="color: white;"><span>&#8377;{{ cart_order.product.price }}</td>
+                              <td data-th="Quantity" style="color: white;">{{ cart_order.quantity }}</td>
+                              <td class="actions"></td>
+                          </tr>
+                          {% endfor %}
+                      </tbody>
+                  </table>
+                  <div class="float-right text-right">
+                    <h4>Subtotal:</h4>
+                    <h1><span>&#8377;{{ total_price }}</h1>
+                </div>
 
     <div class="row">
 

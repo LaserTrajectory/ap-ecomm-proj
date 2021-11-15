@@ -1,21 +1,51 @@
+<!-- source: https://bootstraptor.com/snippets/bootstrap-4-snippet-shopping-cart/ -->
+
+
 {% extends "base/base.html" %}
 
 {% block content %}
-    <h3>Your wishlist</h3>
-    {% for wishlist_inst in wishlist.products.all %}
-        <div class="container border border-3 mt-2 pt-2 pb-2">
-            <p class="pt-2"> <a href="{{ wishlist_inst.product.get_abs_url }}">{{ wishlist_inst.product.title }}</a> | {{ wishlist_inst.product.price }}</p>
-            <p>People interested: 
-                {% for key, val in interest_dict.items %}
 
-                    {% if wishlist_inst.product.title == key %}
-                        {{ val }}
-                    {% endif %}
+    <section class="pt-5 pb-5">
+        <div class="container" style="color: white;">
+          <div class="row w-100" style="color: white;">
+              <div class="col-lg-12 col-md-12 col-12" style="color: white;">
+                  <h3 class="display-5 mb-2 text-center">Wishlist</h3>
+                  <p class="mb-5 text-center">
+                      <i class="text-info font-weight-bold">{{ request.session.wishlist_count_num }}</i> items in your wishlist</p>
+                  <table id="shoppingCart" class="table table-condensed table-responsive">
+                      <thead>
+                          <tr>
+                              <th style="width:60%; color: white;">Product</th>
+                              <th style="width:12%; color: white;">Price</th>
+                              <th style="width:10%; color: white;">People interested</th>
+                              <th style="width:16%"></th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          {% for cart_order in wishlist.products.all %}
+                          <tr>
+                              <td data-th="Product">
+                                  <div class="row">
+                                      <div class="col-md-9 text-left mt-sm-2">
+                                          <h4 style="color: white;"><a href="{{ cart_order.product.get_abs_url }}">{{ cart_order.product.title }}</a></h4>
+                                          <p class="font-weight-light" style="color: white;">{{ cart_order.product.seller }}</p>
+                                      </div>
+                                  </div>
+                              </td>
+                              <td data-th="Price" style="color: white;"><span>&#8377;{{ cart_order.product.price }}</td>
+                              <td data-th="Quantity" style="color: white;">
+                                {% for key, val in interest_dict.items %}
 
-                {% endfor %}
-                (including you)
-            </p>
-            
-        </div>
-    {% endfor %}
+                                    {% if cart_order.product.title == key %}
+                                        {{ val }}
+                                    {% endif %}
+
+                                {% endfor %}
+                              </td>
+                              <td class="actions" data-th="">
+                              </td>
+                          </tr>
+                          {% endfor %}
+                      </tbody>
+                  </table>
 {% endblock content %}
