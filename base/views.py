@@ -25,6 +25,7 @@ from base import models
 
 from thefuzz import fuzz
 from thefuzz import process
+import random 
 
 """
 Sources:
@@ -74,8 +75,23 @@ def product_page(request):
 
     queryset = Product.objects.all()
 
+    discounts = []
+
+    for i in range(0, len(queryset)):
+
+        discounts.append(random.randint(20, 80))
+
+    id_list = []
+
+    for i in range(1, (len(queryset) + 1)):
+
+        id_list.append(i)
+
+    discount_dict = dict(zip(id_list, discounts))
+
     context = {
-        'object_list': queryset
+        'object_list': queryset,
+        'discount_dict': discount_dict
     }
 
     context['picture'] = request.user.social_auth.get(provider='auth0').extra_data['picture']
@@ -122,6 +138,20 @@ def SearchFilterView(request):
     print(seller_list)
 
     # print(type(rating_set))
+
+    discounts = []
+
+    for i in range(0, len(queryset)):
+
+        discounts.append(random.randint(20, 80))
+
+    id_list = []
+
+    for i in range(1, (len(queryset) + 1)):
+
+        id_list.append(i)
+
+    discount_dict = dict(zip(id_list, discounts))
 
     if title_contains != '' and title_contains is not None:
 
@@ -247,7 +277,8 @@ def SearchFilterView(request):
         'category_set': category_set,
         'rating_set': rating_set,
         'fuzz_title_matches': fuzz_match_title_array,
-        'fuzz_seller_matches': fuzz_match_seller_array
+        'fuzz_seller_matches': fuzz_match_seller_array,
+        'discount_dict': discount_dict
     }
 
     context['average_rating'] = average_rating

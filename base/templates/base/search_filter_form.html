@@ -241,7 +241,11 @@
                       <img src="{{ prod.image.url }}" alt="" width="200" height="200">
                     </a>
                     <span class="product-discount-label">
-                      -20%
+                      {% for key, val in discount_dict.items %}
+                        {% if prod.id == key %}
+                          {{ val }}%
+                        {% endif %}
+                      {% endfor %}
                     </span>
                   </div>
                   <div class="product-content">
@@ -249,7 +253,7 @@
                       <a class="article-title" href="{{ prod.get_abs_url }}">{{ prod.title }}</a>
                     </h3>
                     <div class="price">
-                      ${{ prod.price }}
+                      <span>&#8377;{{ prod.price }}
                     </div>
                     <div class="rating">
                       <style>
@@ -258,15 +262,44 @@
                           border-color: black;
                         }
                       </style>
+                      {% if prod.ratings.name == 5 %}
                       <i class="fa fa-star"></i>
                       <i class="fa fa-star"></i>
                       <i class="fa fa-star"></i>
                       <i class="fa fa-star"></i>
-                      <i class="fa fa-star-o"></i> 
-                      <span class="ml-1">{{ prod.ratings }} <a href="#!" class="material-tooltip-main card-link" data-toggle="tooltip" data-placement="top" title="Read reviews">(542 reviews)</a></span>
+                      <i class="fa fa-star"></i>
+                      {% elif prod.ratings.name == 4 %}
+                      <i class="fa fa-star"></i>
+                      <i class="fa fa-star"></i>
+                      <i class="fa fa-star"></i>
+                      <i class="fa fa-star"></i>
+                      <i class="fa fa-star-o"></i>
+                      {% elif prod.ratings.name == 3 %}
+                      <i class="fa fa-star"></i>
+                      <i class="fa fa-star"></i>
+                      <i class="fa fa-star"></i>
+                      <i class="fa fa-star-o"></i>
+                      <i class="fa fa-star-o"></i>
+                      {% elif prod.ratings.name == 2 %}
+                      <i class="fa fa-star"></i>
+                      <i class="fa fa-star"></i>
+                      <i class="fa fa-star-o"></i>
+                      <i class="fa fa-star-o"></i>
+                      <i class="fa fa-star-o"></i>
+                      {% elif prod.ratings.name == 1 %}
+                      <i class="fa fa-star"></i>
+                      <i class="fa fa-star-o"></i>
+                      <i class="fa fa-star-o"></i>
+                      <i class="fa fa-star-o"></i>
+                      <i class="fa fa-star-o"></i>
+                      {% endif %} 
+                      <span class="ml-1">{{ prod.ratings.name }}</span>
       </ul>
                     </div>
-                    <div class="availability"> 
+                    <div class="price p-2"> 
+                       {{ prod.seller }}
+                    </div>
+                    <div class="price p-2"> 
                       Availability: {{ prod.available_units }}
                     </div>
                   </div>
