@@ -14,19 +14,23 @@
 
 - Bhavye:
   - Front-end design strategy
-  - Cart, wishlist, view products pages' HTML and CSS
+  - Cart, wishlist, view products, checkout and home pages' HTML and CSS
   - Website layout and structure
+  - Database population for electronics products
 
 - Ishan:
   - Profile, search products, home pages' HTML and CSS
   - Back-end view logic for home page and order summary page
   - Product view backend implementation
+  - Database population for apparel products
   
  - Aniruddh:
     - User authentication, wishlist & cart backend implementation
     - Profile page, checkout, order summary pages' HTML and CSS
     - Database setup + data model implementation  
     - Fuzzy matching + "more like this" recommendation implemenations
+    - Database population for sports products
+   
 
 
 #### Project setup details
